@@ -24,7 +24,7 @@ class BytecodeParser:
   def consume(self, fmt, offset=1):
     return runpack(">" + fmt, self.consume_raw(offset))
 
-  def integer(self):
+  def parse_integer(self):
     is_bigint = self.consume('B')
     if is_bigint == 0:
       data = self.consume('i', 4)
@@ -36,12 +36,12 @@ class BytecodeParser:
       value = signed_bytes_to_int(data[::-1])
       return value if sign == 1 else -value
 
-  def double(self):
-    base = self.integer()
+  def parse_double(self):
+    base = self.parse_integer()
     exp = self.consume('q', 8)
     return base * 2 ** exp
 
-  def char(self):
+  def parse_char(self):
     head = self.consume('B')
     head_chr = chr(head)
 
@@ -54,7 +54,7 @@ class BytecodeParser:
     else:
       return (head_chr + self.consume_raw(3)).decode('utf-8')
 
-  def boolean(self):
+  def parse_boolean(self):
     value = self.consume('B')
     return value == 1
 
@@ -62,4 +62,4 @@ class BytecodeParser:
 parser = BytecodeParser(
     b'\x00'
 )
-print parser.boolean()
+print parser.parse_boolean()
