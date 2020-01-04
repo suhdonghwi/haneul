@@ -54,8 +54,12 @@ class BytecodeParser:
     else:
       return (head_chr + self.consume_raw(3)).decode('utf-8')
 
+  def boolean(self):
+    value = self.consume('B')
+    return value == 1
+
 
 parser = BytecodeParser(
-    b'\xf0\x9f\x90\x9d'
+    b'\x00'
 )
-print parser.char()
+print parser.boolean()
