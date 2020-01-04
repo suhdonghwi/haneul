@@ -36,7 +36,13 @@ class BytecodeParser:
       value = signed_bytes_to_int(data[::-1])
       return value if sign == 1 else -value
 
+  def double(self):
+    base = self.integer()
+    exp = self.consume('q', 8)
+    return base * 2 ** exp
+
 
 parser = BytecodeParser(
-    b'\x01\xFF\x00\x00\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10')
-print parser.integer()
+    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x18\xff\xff\xff\xff\xff\xff\xff\xcc'
+)
+print parser.double()
