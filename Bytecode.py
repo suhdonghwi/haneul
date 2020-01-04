@@ -41,8 +41,21 @@ class BytecodeParser:
     exp = self.consume('q', 8)
     return base * 2 ** exp
 
+  def char(self):
+    head = self.consume('B')
+    head_chr = chr(head)
+
+    if head < 0x80:
+      return head_chr
+    elif head < 0xe0:
+      return (head_chr + self.consume_raw(1)).decode('utf-8')
+    elif head < 0xf0:
+      return (head_chr + self.consume_raw(2)).decode('utf-8')
+    else:
+      return (head_chr + self.consume_raw(3)).decode('utf-8')
+
 
 parser = BytecodeParser(
-    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x18\xff\xff\xff\xff\xff\xff\xff\xcc'
+    b'\xf0\x9f\x90\x9d'
 )
-print parser.double()
+print parser.char()
