@@ -15,7 +15,7 @@ class BytecodeParser:
     consumed = b''
 
     for i in range(0, offset):
-      consumed = consumed + self.code[self.pos]
+      consumed += self.code[self.pos]
       print "Consumed : " + str(ord(self.code[self.pos]))
       self.pos += 1
 
@@ -54,12 +54,20 @@ class BytecodeParser:
     else:
       return (head_chr + self.consume_raw(3)).decode('utf-8')
 
+  def parse_string(self):
+    count = self.consume('Q', 8)
+    result = ''
+    for i in range(0, count):
+      result += self.parse_char()
+
+    return result
+
   def parse_boolean(self):
     value = self.consume('B')
     return value == 1
 
 
 parser = BytecodeParser(
-    b'\x00'
+    b'\x00\x00\x00\x00\x00\x00\x00\x08\x48\x65\x6c\x6c\x6f\xea\xb0\x80\xeb\x82\x98\xeb\x8b\xa4'
 )
-print parser.parse_boolean()
+print parser.parse_string()
