@@ -2,7 +2,7 @@ from rpython.rlib.rstruct.runpack import runpack
 
 from instruction import *
 from constant import FuncObject
-from dump import dump_constant
+from dump import dump_constant, dump_inst
 
 
 def signed_bytes_to_int(data):
@@ -145,5 +145,4 @@ for name in var_names:
   print name
 print "[code]"
 for inst in code:
-  print str(inst.line_number) + " " + \
-      str(inst.opcode) + " " + str(inst.operand)
+  dump_inst(inst)
