@@ -18,7 +18,7 @@ INST_NEGATE = 16
 
 
 class Instruction:
-  def __init__(self, line_number, opcode, operand=None):
+  def __init__(self, line_number, opcode, operand=0):
     self.line_number = line_number
     self.opcode = opcode
     self.operand = operand
