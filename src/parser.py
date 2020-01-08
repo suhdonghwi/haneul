@@ -29,6 +29,9 @@ class BytecodeParser:
   def consume_ubyte(self):
     return runpack(">B", self.consume_raw(1))
 
+  def consume_byte(self):
+    return runpack(">b", self.consume_raw(1))
+
   def consume_ushort(self):
     return runpack(">H", self.consume_raw(2))
 
@@ -46,18 +49,16 @@ class BytecodeParser:
 
   def parse_integer(self):
     is_bigint = self.consume_ubyte()
-    # if is_bigint == 0:
-    if True:
+    if is_bigint == 0:
       data = self.consume_int()
       return ConstInteger(data)
-    """
     else:
       sign = self.consume_byte()
       bytes_count = self.consume_ulonglong()
-      data = self.consume_raw(bytes_count)
-      value = bytes_to_int(list(reversed(data)))
-      return value if sign == 1 else -value
-    """
+      data = list(self.consume_raw(bytes_count))
+      data.reverse()
+      value = ConstInteger(bytes_to_int(data))
+      return value if sign == 1 else value.negate()
 
   def parse_double(self):
     base = self.parse_integer().intval
