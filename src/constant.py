@@ -1,9 +1,6 @@
-TYPE_NONE = 0
-TYPE_INT = 1
-TYPE_DOUBLE = 2
-TYPE_BOOLEAN = 3
-TYPE_CHAR = 4
-TYPE_FUNC = 5
+types = ['NONE', 'INT', 'DOUBLE', 'BOOLEAN', 'CHAR', 'FUNC']
+for (i, typename) in enumerate(types):
+  globals()['TYPE_' + typename] = i
 
 
 class Constant:
