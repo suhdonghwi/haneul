@@ -43,7 +43,8 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval + other.doubleval)
     else:
-      raise Exception("wrong type")
+      raise Exception("wrong type : " + str(self.type) +
+                      " and " + str(other.type))
 
   def subtract(self, other):
     if other.type == TYPE_INT:

@@ -40,4 +40,4 @@ def dump_constant(constant):
 
 def dump_inst(inst):
   nprint(str(inst.line_number) + " " +
-         str(inst.opcode) + " " + str(inst.operand))
+         str(inst.opcode))

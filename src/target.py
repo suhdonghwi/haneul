@@ -24,8 +24,8 @@ def entry_point(argv):
   parser = BytecodeParser(content)
   (const_table, var_names, code) = parser.parse_code()
 
-  interpreter = BytecodeInterpreter(const_table, var_names, code)
-  interpreter.run()
+  interpreter = BytecodeInterpreter(const_table)
+  interpreter.run(code)
   return 0
 
 
