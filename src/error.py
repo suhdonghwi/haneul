@@ -7,3 +7,8 @@ class HaneulError(Exception):
 class TypeError(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
+
+
+class ArgNumberMismatch(HaneulError):
+  def __init__(self, message):
+    HaneulError.__init__(self, message)

@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from instruction import *
 from constant import *
-from error import HaneulError
+from error import HaneulError, ArgNumberMismatch
 
 
 class CallFrame:
@@ -45,6 +47,10 @@ class BytecodeInterpreter:
           # print "CALL"
           func_object = self.stack[len(
               self.stack) - inst.operand_int - 1].funcval
+
+          if func_object.arity != inst.operand_int:
+            raise ArgNumberMismatch("이 함수는 " + str(func_object.arity) +
+                                    "개의 인수를 받지만 " + str(inst.operand_int) + "개의 인수가 주어졌습니다.")
 
           new_slot_start = len(self.stack) - inst.operand_int - 1
           self.call_frames.append(
