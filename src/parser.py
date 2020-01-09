@@ -9,20 +9,28 @@ from dump import dump_constant, dump_inst
 from interpreter import BytecodeInterpreter
 
 
-def bytes_to_int(bytes):
+def bytes_to_int(data, length):
   result = 0
-  for b in bytes:
-    result = result * 256 + int(b)
+  for i in range(length):
+    result = result * 256 + data[i]
   return result
 
 
 class BytecodeParser:
   def __init__(self, code):
-    self.code = str(code)
+    self.code = code
     self.pos = 0
 
   def consume_raw(self, offset=1):
     consumed = self.code[self.pos:self.pos+offset]
+    self.pos += offset
+    return consumed
+
+  def consume_raw_reverse(self, offset=1):
+    consumed = ''
+    for i in range(self.pos+offset-1, intmask(self.pos)-1, -1):
+      consumed += self.code[i]
+
     self.pos += offset
     return consumed
 
@@ -55,9 +63,8 @@ class BytecodeParser:
     else:
       sign = self.consume_byte()
       bytes_count = self.consume_ulonglong()
-      data = list(self.consume_raw(bytes_count))
-      data.reverse()
-      value = ConstInteger(bytes_to_int(data))
+      data = self.consume_raw_reverse(bytes_count)
+      value = ConstInteger(bytes_to_int(bytearray(data), bytes_count))
       return value if sign == 1 else value.negate()
 
   def parse_double(self):
@@ -146,15 +153,14 @@ class BytecodeParser:
 
   def parse_funcobject(self):
     arity = self.consume_ushort()
-    insts = self.parse_instruction_list()
     const_table = self.parse_constant_list()
     var_names = self.parse_string_list()
+    insts = self.parse_instruction_list()
 
     return ConstFunc(FuncObject(arity, insts, const_table, var_names))
 
   def parse_buildinternal(self):
     const_table = self.parse_constant_list()
-    print "YEP ITS OVER_-----------------"
     var_names = self.parse_string_list()
 
     return (const_table, var_names)
@@ -167,8 +173,11 @@ class BytecodeParser:
 
 
 parser = BytecodeParser(
-    b'\x00\x00\x00\x00\x00\x00\x00\x02\x04\x00\x01\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x02\x03\x00\x00\x00\x00\x00\x00\x00\x01\xea\xb0\x92\x00\x00\x00\x03\x04\x00\x00\x00\x00\x00\x00\x00\x03\x05\x00\x00\x00\x00\x00\x00\x00\x01\xea\xb0\x92\x00\x00\x00\x03\x0a\x00\x00\x00\x03\x09\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\xec\x88\x98\x00\x00\x00\x00\x00\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x00\x00\x00\x00\x00\x00\x00\x03\xed\x85\x8c\xec\x8a\xa4\xed\x8a\xb8\x00\x00\x00\x05\x05\x00\x00\x00\x00\x00\x00\x00\x03\xed\x85\x8c\xec\x8a\xa4\xed\x8a\xb8\x00\x00\x00\x05\x00\x00\x00\x00\x01\x00\x00\x00\x05\x06\x00\x00\x00\x01\x00\x00\x00\x05\x01'
+    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x0e\x23\x26\xf9\xbb\x47\x5d\x5d\x9e\xcf\x09\xec\xaa\x43\x37'
 )
+result = parser.parse_integer()
+print result.intval
+"""
 (const_table, var_names, code) = parser.parse_code()
 
 print "\n# Bytecode parsing result: "
@@ -184,3 +193,4 @@ for inst in code:
 
 interpreter = BytecodeInterpreter(const_table)
 interpreter.run(code)
+"""

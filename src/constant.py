@@ -95,7 +95,7 @@ class ConstInteger(Constant):
       raise Exception("wrong type")
 
   def negate(self):
-    raise Exception("wrong type")
+    return ConstInteger(-self.intval)
 
 
 class ConstDouble(Constant):

@@ -1,4 +1,4 @@
-from constant import FuncObject
+from constant import *
 
 nest_level = 0
 
@@ -34,6 +34,8 @@ def dump_constant(constant):
       dump_inst(inst)
     nest_level -= 1
     nest_level -= 1
+  elif constant.type == TYPE_INT:
+    nprint(constant.intval)
   else:
     nprint(constant)
 
