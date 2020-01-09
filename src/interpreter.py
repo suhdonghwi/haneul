@@ -40,7 +40,7 @@ class BytecodeInterpreter:
         # print "LOAD_GLOBAL"
         self.stack.append(self.global_vars[inst.operand_str])
       elif inst.opcode == INST_CALL:
-        print "CALL"
+        # print "CALL"
         func_object = self.stack[len(
             self.stack) - inst.operand_int - 1].funcval
 

@@ -2,6 +2,7 @@ import os
 
 from interpreter import BytecodeInterpreter
 from parser import BytecodeParser
+from error import TypeError
 
 
 def entry_point(argv):
@@ -25,7 +26,10 @@ def entry_point(argv):
   (const_table, var_names, code) = parser.parse_code()
 
   interpreter = BytecodeInterpreter(const_table)
-  interpreter.run(code)
+  try:
+    interpreter.run(code)
+  except TypeError as e:
+    print e.message
   return 0
 
 

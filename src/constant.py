@@ -1,32 +1,64 @@
+# -*- coding: utf-8 -*-
+
+from error import TypeError
+
 types = ['NONE', 'INT', 'DOUBLE', 'BOOLEAN', 'CHAR', 'FUNC']
 for (i, typename) in enumerate(types):
   globals()['TYPE_' + typename] = i
 
 
+def get_type_name(t):
+  if t == TYPE_INT:
+    return "정수"
+  elif t == TYPE_DOUBLE:
+    return "실수"
+  elif t == TYPE_BOOLEAN:
+    return "참 또는 거짓"
+  elif t == TYPE_CHAR:
+    return "문자"
+  elif t == TYPE_FUNC:
+    return "함수"
+  else:
+    return "(타입 없음)"
+
+
+def binary_typeerror(type1, type2, operation):
+  raise TypeError(get_type_name(type1) + " 타입의 값과 " + get_type_name(type2) + " 타입의 값은 " +
+                  operation + " 연산을 지원하지 않습니다.")
+
+
+def unary_typeerror(type1, operation):
+  raise TypeError(get_type_name(type1) + " 타입의 값은 " +
+                  operation + " 연산을 지원하지 않습니다.")
+
+
 class Constant:
   def add(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "더하기")
 
   def subtract(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "빼기")
 
   def multiply(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "곱하기")
 
   def divide(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "나누기")
 
   def mod(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "나머지")
 
   def equal(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "비교")
 
   def less_than(self, other):
-    raise Exception("wrong type")
+    binary_typeerror(self.type, other.type, "대소 비교")
+
+  def greater_than(self, other):
+    binary_typeerror(self.type, other.type, "대소 비교")
 
   def negate(self):
-    raise Exception("wrong type")
+    unary_typeerror(self.type, "반전")
 
 
 class ConstInteger(Constant):
@@ -40,7 +72,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval + other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "더하기")
 
   def subtract(self, other):
     if other.type == TYPE_INT:
@@ -48,7 +80,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval - other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "빼기")
 
   def multiply(self, other):
     if other.type == TYPE_INT:
@@ -56,7 +88,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval * other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "곱하기")
 
   def divide(self, other):
     if other.type == TYPE_INT:
@@ -64,13 +96,13 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval / other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "나누기")
 
   def mod(self, other):
     if other.type == TYPE_INT:
       return ConstInteger(self.intval % other.intval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "나머지")
 
   def equal(self, other):
     if other.type == TYPE_INT:
@@ -84,7 +116,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.intval < other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "대소 비교")
 
   def greater_than(self, other):
     if other.type == TYPE_INT:
@@ -92,7 +124,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.intval > other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "대소 비교")
 
   def negate(self):
     return ConstInteger(-self.intval)
@@ -109,7 +141,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval + other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "더하기")
 
   def subtract(self, other):
     if other.type == TYPE_INT:
@@ -117,7 +149,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval - other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "빼기")
 
   def multiply(self, other):
     if other.type == TYPE_INT:
@@ -125,7 +157,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval * other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "곱하기")
 
   def divide(self, other):
     if other.type == TYPE_INT:
@@ -133,10 +165,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval / other.doubleval)
     else:
-      raise Exception("wrong type")
-
-  def mod(self, other):
-    raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "나누기")
 
   def equal(self, other):
     if other.type == TYPE_DOUBLE:
@@ -150,7 +179,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.doubleval < other.doubleval)
     else:
-      raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "대소 비교")
 
   def greater_than(self, other):
     if other.type == TYPE_INT:
@@ -158,10 +187,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.doubleval > other.doubleval)
     else:
-      raise Exception("wrong type")
-
-  def negate(self):
-    raise Exception("wrong type")
+      binary_typeerror(self.type, other.type, "대소 비교")
 
 
 class ConstBoolean(Constant):
@@ -169,32 +195,11 @@ class ConstBoolean(Constant):
     self.boolval = value
     self.type = TYPE_BOOLEAN
 
-  def add(self, other):
-    raise Exception("wrong type")
-
-  def subtract(self, other):
-    raise Exception("wrong type")
-
-  def multiply(self, other):
-    raise Exception("wrong type")
-
-  def divide(self, other):
-    raise Exception("wrong type")
-
-  def mod(self, other):
-    raise Exception("wrong type")
-
   def equal(self, other):
     if other.type == TYPE_BOOLEAN:
       return ConstBoolean(self.boolval == other.boolval)
     else:
       return ConstBoolean(False)
-
-  def less_than(self, other):
-    raise Exception("wrong type")
-
-  def greater_than(self, other):
-    raise Exception("wrong type")
 
   def negate(self):
     return ConstBoolean(not self.boolval)
@@ -205,21 +210,6 @@ class ConstChar(Constant):
     self.charval = value
     self.type = TYPE_CHAR
 
-  def add(self, other):
-    raise Exception("wrong type")
-
-  def subtract(self, other):
-    raise Exception("wrong type")
-
-  def multiply(self, other):
-    raise Exception("wrong type")
-
-  def divide(self, other):
-    raise Exception("wrong type")
-
-  def mod(self, other):
-    raise Exception("wrong type")
-
   def equal(self, other):
     if other.type == TYPE_CHAR:
       return ConstBoolean(self.charval == other.charval)
@@ -227,46 +217,22 @@ class ConstChar(Constant):
       return ConstBoolean(False)
 
   def less_than(self, other):
-    raise Exception("wrong type")
+    if other.type == TYPE_CHAR:
+      return ConstBoolean(self.charval < other.charval)
+    else:
+      binary_typeerror(self.type, other.type, "대소 비교")
 
   def greater_than(self, other):
-    raise Exception("wrong type")
-
-  def negate(self):
-    raise Exception("wrong type")
+    if other.type == TYPE_CHAR:
+      return ConstBoolean(self.charval > other.charval)
+    else:
+      binary_typeerror(self.type, other.type, "대소 비교")
 
 
 class ConstFunc(Constant):
   def __init__(self, value):
     self.funcval = value
     self.type = TYPE_FUNC
-
-  def add(self, other):
-    raise Exception("wrong type")
-
-  def subtract(self, other):
-    raise Exception("wrong type")
-
-  def multiply(self, other):
-    raise Exception("wrong type")
-
-  def divide(self, other):
-    raise Exception("wrong type")
-
-  def mod(self, other):
-    raise Exception("wrong type")
-
-  def equal(self, other):
-    raise Exception("wrong type")
-
-  def less_than(self, other):
-    raise Exception("wrong type")
-
-  def greater_than(self, other):
-    raise Exception("wrong type")
-
-  def negate(self):
-    raise Exception("wrong type")
 
 
 class FuncObject:
