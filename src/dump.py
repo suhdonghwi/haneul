@@ -34,7 +34,7 @@ def dump_constant(constant):
       dump_inst(inst)
     nest_level -= 1
     nest_level -= 1
-  elif constant.type == TYPE_INT:
+  elif constant.type == TYPE_INTEGER:
     nprint(constant.intval)
   else:
     nprint(constant)

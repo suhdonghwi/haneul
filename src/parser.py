@@ -121,15 +121,17 @@ class BytecodeParser:
     for i in range(count):
       const_type = self.consume_ubyte()
 
-      if const_type == 0:
+      if const_type == TYPE_NONE:
+        result.append(ConstNone())
+      elif const_type == TYPE_INTEGER:
         result.append(self.parse_integer())
-      elif const_type == 1:
+      elif const_type == TYPE_REAL:
         result.append(self.parse_double())
-      elif const_type == 2:
+      elif const_type == TYPE_STRING:
         result.append(self.parse_string())
-      elif const_type == 3:
+      elif const_type == TYPE_BOOLEAN:
         result.append(self.parse_boolean())
-      elif const_type == 4:
+      elif const_type == TYPE_FUNC:
         result.append(self.parse_funcobject())
 
     return result

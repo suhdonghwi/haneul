@@ -121,9 +121,9 @@ class BytecodeInterpreter:
       """
       # print "[",
       for c in self.stack:
-        if c.type == TYPE_INT:
+        if c.type == TYPE_INTEGER:
           # print c.intval,
-        if c.type == TYPE_DOUBLE:
+        if c.type == TYPE_REAL:
           # print c.doubleval,
         if c.type == TYPE_STRING:
           # print c.stringval,
