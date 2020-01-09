@@ -2,46 +2,52 @@ from instruction import *
 from constant import *
 
 
+class CallFrame:
+  def __init__(self, slot_start, const_table):
+    self.slot_start = slot_start
+    self.const_table = const_table
+
+
 class BytecodeInterpreter:
   def __init__(self, const_table):
-    self.const_table = const_table
     self.global_vars = {}
 
     self.stack = []
-    self.slotStart = 0
+    self.call_frames = [CallFrame(0, const_table)]
 
   def run(self, code):
     code_iter = iter(code)
     for inst in code_iter:
       if inst.opcode == INST_PUSH:
         # print "PUSH"
-        self.stack.append(self.const_table[inst.operand_int])
+        self.stack.append(
+            self.call_frames[-1].const_table[inst.operand_int])
       elif inst.opcode == INST_POP:
         # print "POP"
         self.stack.pop()
       elif inst.opcode == INST_STORE:
         # print "STORE"
-        self.stack[self.slotStart + inst.operand_int + 1] = self.stack.pop()
+        self.stack[self.call_frames[-1].slot_start +
+                   inst.operand_int + 1] = self.stack.pop()
       elif inst.opcode == INST_STORE_GLOBAL:
         # print "STORE_GLOBAL"
         self.global_vars[inst.operand_str] = self.stack.pop()
       elif inst.opcode == INST_LOAD:
         # print "LOAD"
-        self.stack.append(self.stack[self.slotStart + inst.operand_int + 1])
+        self.stack.append(
+            self.stack[self.call_frames[-1].slot_start + inst.operand_int + 1])
       elif inst.opcode == INST_LOAD_GLOBAL:
         # print "LOAD_GLOBAL"
         self.stack.append(self.global_vars[inst.operand_str])
       elif inst.opcode == INST_CALL:
         # print "CALL"
-        funcObject = self.stack[len(self.stack) - inst.operand_int - 1].funcval
+        func_object = self.stack[len(
+            self.stack) - inst.operand_int - 1].funcval
 
-        prevSlotStart = self.slotStart
-        prevConstTable = self.const_table
-        self.slotStart = len(self.stack) - inst.operand_int - 1
-        self.const_table = funcObject.const_table
-        self.run(funcObject.code)
-        self.slotStart = prevSlotStart
-        self.const_table = prevConstTable
+        new_slot_start = len(self.stack) - inst.operand_int - 1
+        self.call_frames.append(
+            CallFrame(new_slot_start, func_object.const_table))
+        self.run(func_object.code)
       elif inst.opcode == INST_JMP_FORWARD:
         # print "JMPFORWARD"
         for i in range(inst.operand_int):
@@ -56,9 +62,10 @@ class BytecodeInterpreter:
         # print "RETURN"
         return_value = self.stack.pop()
 
-        for i in range(len(self.stack) - self.slotStart):
+        for i in range(len(self.stack) - self.call_frames[-1].slot_start):
           self.stack.pop()
 
+        self.call_frames.pop()
         self.stack.append(return_value)
         break
       elif inst.opcode == INST_NEGATE:
