@@ -2,7 +2,7 @@
 
 from instruction import *
 from constant import *
-from error import HaneulError, ArgNumberMismatch, UnboundVariable
+from error import HaneulError, ArgNumberMismatch, UnboundVariable, CannotReturn
 
 
 class CallFrame:
@@ -73,8 +73,10 @@ class BytecodeInterpreter:
               next(code_iter)
         elif inst.opcode == INST_RETURN:
           # print "RETURN"
-          return_value = self.stack.pop()
+          if len(self.call_frames) <= 1:
+            raise CannotReturn(u"여기에서는 값을 반환할 수 없습니다.")
 
+          return_value = self.stack.pop()
           for i in range(len(self.stack) - self.call_frames[-1].slot_start):
             self.stack.pop()
 
