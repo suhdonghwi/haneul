@@ -1,5 +1,6 @@
 from instruction import *
 from constant import *
+from error import HaneulError
 
 
 class CallFrame:
@@ -18,86 +19,91 @@ class BytecodeInterpreter:
   def run(self, code):
     code_iter = iter(code)
     for inst in code_iter:
-      if inst.opcode == INST_PUSH:
-        # print "PUSH"
-        self.stack.append(
-            self.call_frames[-1].const_table[inst.operand_int])
-      elif inst.opcode == INST_POP:
-        # print "POP"
-        self.stack.pop()
-      elif inst.opcode == INST_STORE:
-        # print "STORE"
-        self.stack[self.call_frames[-1].slot_start +
-                   inst.operand_int + 1] = self.stack.pop()
-      elif inst.opcode == INST_STORE_GLOBAL:
-        # print "STORE_GLOBAL"
-        self.global_vars[inst.operand_str] = self.stack.pop()
-      elif inst.opcode == INST_LOAD:
-        # print "LOAD"
-        self.stack.append(
-            self.stack[self.call_frames[-1].slot_start + inst.operand_int + 1])
-      elif inst.opcode == INST_LOAD_GLOBAL:
-        # print "LOAD_GLOBAL"
-        self.stack.append(self.global_vars[inst.operand_str])
-      elif inst.opcode == INST_CALL:
-        # print "CALL"
-        func_object = self.stack[len(
-            self.stack) - inst.operand_int - 1].funcval
+      try:
+        if inst.opcode == INST_PUSH:
+          # print "PUSH"
+          self.stack.append(
+              self.call_frames[-1].const_table[inst.operand_int])
+        elif inst.opcode == INST_POP:
+          # print "POP"
+          self.stack.pop()
+        elif inst.opcode == INST_STORE:
+          # print "STORE"
+          self.stack[self.call_frames[-1].slot_start +
+                     inst.operand_int + 1] = self.stack.pop()
+        elif inst.opcode == INST_STORE_GLOBAL:
+          # print "STORE_GLOBAL"
+          self.global_vars[inst.operand_str] = self.stack.pop()
+        elif inst.opcode == INST_LOAD:
+          # print "LOAD"
+          self.stack.append(
+              self.stack[self.call_frames[-1].slot_start + inst.operand_int + 1])
+        elif inst.opcode == INST_LOAD_GLOBAL:
+          # print "LOAD_GLOBAL"
+          self.stack.append(self.global_vars[inst.operand_str])
+        elif inst.opcode == INST_CALL:
+          # print "CALL"
+          func_object = self.stack[len(
+              self.stack) - inst.operand_int - 1].funcval
 
-        new_slot_start = len(self.stack) - inst.operand_int - 1
-        self.call_frames.append(
-            CallFrame(new_slot_start, func_object.const_table))
-        self.run(func_object.code)
-      elif inst.opcode == INST_JMP_FORWARD:
-        # print "JMPFORWARD"
-        for i in range(inst.operand_int):
-          next(code_iter)
-      elif inst.opcode == INST_POP_JMP_IF_FALSE:
-        # print "POPJMPIFFALSE"
-        value = self.stack.pop().boolval
-        if value == False:
+          new_slot_start = len(self.stack) - inst.operand_int - 1
+          self.call_frames.append(
+              CallFrame(new_slot_start, func_object.const_table))
+          self.run(func_object.code)
+        elif inst.opcode == INST_JMP_FORWARD:
+          # print "JMPFORWARD"
           for i in range(inst.operand_int):
             next(code_iter)
-      elif inst.opcode == INST_RETURN:
-        # print "RETURN"
-        return_value = self.stack.pop()
+        elif inst.opcode == INST_POP_JMP_IF_FALSE:
+          # print "POPJMPIFFALSE"
+          value = self.stack.pop().boolval
+          if value == False:
+            for i in range(inst.operand_int):
+              next(code_iter)
+        elif inst.opcode == INST_RETURN:
+          # print "RETURN"
+          return_value = self.stack.pop()
 
-        for i in range(len(self.stack) - self.call_frames[-1].slot_start):
-          self.stack.pop()
+          for i in range(len(self.stack) - self.call_frames[-1].slot_start):
+            self.stack.pop()
 
-        self.call_frames.pop()
-        self.stack.append(return_value)
-        break
-      elif inst.opcode == INST_NEGATE:
-        # print "NEGATE"
-        value = self.stack.pop()
-        self.stack.append(value.negate())
-      else:
-        rhs, lhs = self.stack.pop(), self.stack.pop()
-        if inst.opcode == INST_ADD:
-          # print "ADD"
-          self.stack.append(lhs.add(rhs))
-        elif inst.opcode == INST_SUBTRACT:
-          # print "SUBTRACT"
-          self.stack.append(lhs.subtract(rhs))
-        elif inst.opcode == INST_MULTIPLY:
-          # print "MULTIPLY"
-          self.stack.append(lhs.multiply(rhs))
-        elif inst.opcode == INST_DIVIDE:
-          # print "DIVIDE"
-          self.stack.append(lhs.divide(rhs))
-        elif inst.opcode == INST_MOD:
-          # print "MOD"
-          self.stack.append(lhs.mod(rhs))
-        elif inst.opcode == INST_EQUAL:
-          # print "EQUAL"
-          self.stack.append(lhs.equal(rhs))
-        elif inst.opcode == INST_LESS_THAN:
-          # print "LESS_THAN"
-          self.stack.append(lhs.less_than(rhs))
-        elif inst.opcode == INST_GREATER_THAN:
-          # print "GREATER_THAN"
-          self.stack.append(lhs.greater_than(rhs))
+          self.call_frames.pop()
+          self.stack.append(return_value)
+          break
+        elif inst.opcode == INST_NEGATE:
+          # print "NEGATE"
+          value = self.stack.pop()
+          self.stack.append(value.negate())
+        else:
+          rhs, lhs = self.stack.pop(), self.stack.pop()
+          if inst.opcode == INST_ADD:
+            # print "ADD"
+            self.stack.append(lhs.add(rhs))
+          elif inst.opcode == INST_SUBTRACT:
+            # print "SUBTRACT"
+            self.stack.append(lhs.subtract(rhs))
+          elif inst.opcode == INST_MULTIPLY:
+            # print "MULTIPLY"
+            self.stack.append(lhs.multiply(rhs))
+          elif inst.opcode == INST_DIVIDE:
+            # print "DIVIDE"
+            self.stack.append(lhs.divide(rhs))
+          elif inst.opcode == INST_MOD:
+            # print "MOD"
+            self.stack.append(lhs.mod(rhs))
+          elif inst.opcode == INST_EQUAL:
+            # print "EQUAL"
+            self.stack.append(lhs.equal(rhs))
+          elif inst.opcode == INST_LESS_THAN:
+            # print "LESS_THAN"
+            self.stack.append(lhs.less_than(rhs))
+          elif inst.opcode == INST_GREATER_THAN:
+            # print "GREATER_THAN"
+            self.stack.append(lhs.greater_than(rhs))
+      except HaneulError as e:
+        if e.error_line == 0:
+          e.error_line = inst.line_number
+        raise e
 
       """
       # print "[",

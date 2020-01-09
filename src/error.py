@@ -1,3 +1,9 @@
-class TypeError(Exception):
+class HaneulError(Exception):
   def __init__(self, message):
     self.message = message
+    self.error_line = 0
+
+
+class TypeError(HaneulError):
+  def __init__(self, message):
+    HaneulError.__init__(self, message)

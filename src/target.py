@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import os
 
 from interpreter import BytecodeInterpreter
 from parser import BytecodeParser
-from error import TypeError
+from error import HaneulError
 
 
 def entry_point(argv):
@@ -28,8 +30,8 @@ def entry_point(argv):
   interpreter = BytecodeInterpreter(const_table)
   try:
     interpreter.run(code)
-  except TypeError as e:
-    print e.message
+  except HaneulError as e:
+    print "에러 발생 @ " + str(e.error_line) + " : " + e.message
   return 0
 
 
