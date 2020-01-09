@@ -125,8 +125,8 @@ class BytecodeInterpreter:
           # print c.intval,
         if c.type == TYPE_DOUBLE:
           # print c.doubleval,
-        if c.type == TYPE_CHAR:
-          # print c.charval,
+        if c.type == TYPE_STRING:
+          # print c.stringval,
         if c.type == TYPE_BOOLEAN:
           # print c.boolval,
         if c.type == TYPE_FUNC:

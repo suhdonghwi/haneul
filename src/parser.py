@@ -87,16 +87,16 @@ class BytecodeParser:
     else:
       result = (chr(head) + self.consume_raw(3)).decode('utf-8')
 
-    return ConstChar(result)
+    return ConstString(result)
 
   def parse_string(self):
     count = self.consume_ulonglong()
 
     result = u''
-    for i in range(0, count):
-      result += self.parse_char().charval
+    for i in range(count):
+      result += self.parse_char().stringval
 
-    return result
+    return ConstString(result)
 
   def parse_boolean(self):
     value = self.consume_ubyte()
@@ -110,7 +110,7 @@ class BytecodeParser:
     if opcode in [INST_PUSH, INST_STORE, INST_LOAD, INST_CALL, INST_JMP_FORWARD, INST_POP_JMP_IF_FALSE]:
       inst.operand_int = self.consume_int()
     elif opcode in [INST_STORE_GLOBAL, INST_LOAD_GLOBAL]:
-      inst.operand_str = self.parse_string()
+      inst.operand_str = self.parse_string().stringval
 
     return inst
 
@@ -126,7 +126,7 @@ class BytecodeParser:
       elif const_type == 1:
         result.append(self.parse_double())
       elif const_type == 2:
-        result.append(self.parse_char())
+        result.append(self.parse_string())
       elif const_type == 3:
         result.append(self.parse_boolean())
       elif const_type == 4:
@@ -148,7 +148,7 @@ class BytecodeParser:
 
     result = []
     for i in range(0, count):
-      result.append(self.parse_string())
+      result.append(self.parse_string().stringval)
 
     return result
 

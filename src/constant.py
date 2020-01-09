@@ -2,7 +2,7 @@
 
 from error import TypeError
 
-types = ['NONE', 'INT', 'DOUBLE', 'BOOLEAN', 'CHAR', 'FUNC']
+types = ['NONE', 'INT', 'DOUBLE', 'BOOLEAN', 'STRING', 'FUNC']
 for (i, typename) in enumerate(types):
   globals()['TYPE_' + typename] = i
 
@@ -14,8 +14,8 @@ def get_type_name(t):
     return u"실수"
   elif t == TYPE_BOOLEAN:
     return u"참 또는 거짓"
-  elif t == TYPE_CHAR:
-    return u"문자"
+  elif t == TYPE_STRING:
+    return u"문자열"
   elif t == TYPE_FUNC:
     return u"함수"
   else:
@@ -205,28 +205,16 @@ class ConstBoolean(Constant):
     return ConstBoolean(not self.boolval)
 
 
-class ConstChar(Constant):
+class ConstString(Constant):
   def __init__(self, value):
-    self.charval = value
-    self.type = TYPE_CHAR
+    self.stringval = value
+    self.type = TYPE_STRING
 
   def equal(self, other):
-    if other.type == TYPE_CHAR:
-      return ConstBoolean(self.charval == other.charval)
+    if other.type == TYPE_STRING:
+      return ConstBoolean(self.stringval == other.stringval)
     else:
       return ConstBoolean(False)
-
-  def less_than(self, other):
-    if other.type == TYPE_CHAR:
-      return ConstBoolean(self.charval < other.charval)
-    else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
-
-  def greater_than(self, other):
-    if other.type == TYPE_CHAR:
-      return ConstBoolean(self.charval > other.charval)
-    else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
 
 
 class ConstFunc(Constant):
