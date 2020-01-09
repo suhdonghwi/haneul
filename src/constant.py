@@ -19,7 +19,7 @@ def get_type_name(t):
   elif t == TYPE_FUNC:
     return u"함수"
   else:
-    return u"(타입 없음)"
+    return u"(없음)"
 
 
 def binary_typeerror(type1, type2, operation):

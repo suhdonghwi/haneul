@@ -31,8 +31,13 @@ class BytecodeInterpreter:
           self.stack.pop()
         elif inst.opcode == INST_STORE:
           # print "STORE"
-          self.stack[self.call_frames[-1].slot_start +
-                     inst.operand_int + 1] = self.stack.pop()
+          store_index = self.call_frames[-1].slot_start + inst.operand_int + 1
+          # print len(self.stack)
+          # print store_index
+          if len(self.stack) - 1 == store_index:
+            self.stack.append(self.stack.pop())
+          else:
+            self.stack[store_index] = self.stack.pop()
         elif inst.opcode == INST_STORE_GLOBAL:
           # print "STORE_GLOBAL"
           self.global_vars[inst.operand_str] = self.stack.pop()
