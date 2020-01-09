@@ -2,7 +2,7 @@
 
 from instruction import *
 from constant import *
-from error import HaneulError, ArgNumberMismatch
+from error import HaneulError, ArgNumberMismatch, UnboundVariable
 
 
 class CallFrame:
@@ -42,15 +42,20 @@ class BytecodeInterpreter:
               self.stack[self.call_frames[-1].slot_start + inst.operand_int + 1])
         elif inst.opcode == INST_LOAD_GLOBAL:
           # print "LOAD_GLOBAL"
-          self.stack.append(self.global_vars[inst.operand_str])
+          if inst.operand_str in self.global_vars:
+            self.stack.append(self.global_vars[inst.operand_str])
+          else:
+            raise UnboundVariable(
+                u"변수 '%s'을(를) 찾을 수 없습니다." % inst.operand_str)
+
         elif inst.opcode == INST_CALL:
           # print "CALL"
           func_object = self.stack[len(
               self.stack) - inst.operand_int - 1].funcval
 
           if func_object.arity != inst.operand_int:
-            raise ArgNumberMismatch("이 함수는 " + str(func_object.arity) +
-                                    "개의 인수를 받지만 " + str(inst.operand_int) + "개의 인수가 주어졌습니다.")
+            raise ArgNumberMismatch(
+                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습다." % (func_object.arity, inst.operand_int))
 
           new_slot_start = len(self.stack) - inst.operand_int - 1
           self.call_frames.append(

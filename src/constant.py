@@ -9,56 +9,56 @@ for (i, typename) in enumerate(types):
 
 def get_type_name(t):
   if t == TYPE_INT:
-    return "정수"
+    return u"정수"
   elif t == TYPE_DOUBLE:
-    return "실수"
+    return u"실수"
   elif t == TYPE_BOOLEAN:
-    return "참 또는 거짓"
+    return u"참 또는 거짓"
   elif t == TYPE_CHAR:
-    return "문자"
+    return u"문자"
   elif t == TYPE_FUNC:
-    return "함수"
+    return u"함수"
   else:
-    return "(타입 없음)"
+    return u"(타입 없음)"
 
 
 def binary_typeerror(type1, type2, operation):
-  raise TypeError(get_type_name(type1) + " 타입의 값과 " + get_type_name(type2) + " 타입의 값은 " +
-                  operation + " 연산을 지원하지 않습니다.")
+  raise TypeError(u"%s 타입의 값과 %s 타입의 값은 %s 연산을 지원하지 않습니다." %
+                  (get_type_name(type1), get_type_name(type2), operation))
 
 
 def unary_typeerror(type1, operation):
-  raise TypeError(get_type_name(type1) + " 타입의 값은 " +
-                  operation + " 연산을 지원하지 않습니다.")
+  raise TypeError(u"%s 타입의 값은 %s 연산을 지원하지 않습니다." %
+                  (get_type_name(type1), operation))
 
 
 class Constant:
   def add(self, other):
-    binary_typeerror(self.type, other.type, "더하기")
+    binary_typeerror(self.type, other.type, u"더하기")
 
   def subtract(self, other):
-    binary_typeerror(self.type, other.type, "빼기")
+    binary_typeerror(self.type, other.type, u"빼기")
 
   def multiply(self, other):
-    binary_typeerror(self.type, other.type, "곱하기")
+    binary_typeerror(self.type, other.type, u"곱하기")
 
   def divide(self, other):
-    binary_typeerror(self.type, other.type, "나누기")
+    binary_typeerror(self.type, other.type, u"나누기")
 
   def mod(self, other):
-    binary_typeerror(self.type, other.type, "나머지")
+    binary_typeerror(self.type, other.type, u"나머지")
 
   def equal(self, other):
-    binary_typeerror(self.type, other.type, "비교")
+    binary_typeerror(self.type, other.type, u"비교")
 
   def less_than(self, other):
-    binary_typeerror(self.type, other.type, "대소 비교")
+    binary_typeerror(self.type, other.type, u"대소 비교")
 
   def greater_than(self, other):
-    binary_typeerror(self.type, other.type, "대소 비교")
+    binary_typeerror(self.type, other.type, u"대소 비교")
 
   def negate(self):
-    unary_typeerror(self.type, "반전")
+    unary_typeerror(self.type, u"반전")
 
 
 class ConstInteger(Constant):
@@ -72,7 +72,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval + other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "더하기")
+      binary_typeerror(self.type, other.type, u"더하기")
 
   def subtract(self, other):
     if other.type == TYPE_INT:
@@ -80,7 +80,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval - other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "빼기")
+      binary_typeerror(self.type, other.type, u"빼기")
 
   def multiply(self, other):
     if other.type == TYPE_INT:
@@ -88,7 +88,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval * other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "곱하기")
+      binary_typeerror(self.type, other.type, u"곱하기")
 
   def divide(self, other):
     if other.type == TYPE_INT:
@@ -96,13 +96,13 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.intval / other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "나누기")
+      binary_typeerror(self.type, other.type, u"나누기")
 
   def mod(self, other):
     if other.type == TYPE_INT:
       return ConstInteger(self.intval % other.intval)
     else:
-      binary_typeerror(self.type, other.type, "나머지")
+      binary_typeerror(self.type, other.type, u"나머지")
 
   def equal(self, other):
     if other.type == TYPE_INT:
@@ -116,7 +116,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.intval < other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
   def greater_than(self, other):
     if other.type == TYPE_INT:
@@ -124,7 +124,7 @@ class ConstInteger(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.intval > other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
   def negate(self):
     return ConstInteger(-self.intval)
@@ -141,7 +141,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval + other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "더하기")
+      binary_typeerror(self.type, other.type, u"더하기")
 
   def subtract(self, other):
     if other.type == TYPE_INT:
@@ -149,7 +149,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval - other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "빼기")
+      binary_typeerror(self.type, other.type, u"빼기")
 
   def multiply(self, other):
     if other.type == TYPE_INT:
@@ -157,7 +157,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval * other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "곱하기")
+      binary_typeerror(self.type, other.type, u"곱하기")
 
   def divide(self, other):
     if other.type == TYPE_INT:
@@ -165,7 +165,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstDouble(self.doubleval / other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "나누기")
+      binary_typeerror(self.type, other.type, u"나누기")
 
   def equal(self, other):
     if other.type == TYPE_DOUBLE:
@@ -179,7 +179,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.doubleval < other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
   def greater_than(self, other):
     if other.type == TYPE_INT:
@@ -187,7 +187,7 @@ class ConstDouble(Constant):
     elif other.type == TYPE_DOUBLE:
       return ConstBoolean(self.doubleval > other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
 
 class ConstBoolean(Constant):
@@ -220,13 +220,13 @@ class ConstChar(Constant):
     if other.type == TYPE_CHAR:
       return ConstBoolean(self.charval < other.charval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
   def greater_than(self, other):
     if other.type == TYPE_CHAR:
       return ConstBoolean(self.charval > other.charval)
     else:
-      binary_typeerror(self.type, other.type, "대소 비교")
+      binary_typeerror(self.type, other.type, u"대소 비교")
 
 
 class ConstFunc(Constant):

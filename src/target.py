@@ -23,7 +23,6 @@ def entry_point(argv):
     content += read
   os.close(fp)
 
-  print content
   parser = BytecodeParser(content)
   (const_table, var_names, code) = parser.parse_code()
 
@@ -31,7 +30,7 @@ def entry_point(argv):
   try:
     interpreter.run(code)
   except HaneulError as e:
-    print "에러 발생 @ " + str(e.error_line) + " : " + e.message
+    print (u"에러 발생 @ %d : %s" % (e.error_line, e.message)).encode('utf-8')
   return 0
 
 

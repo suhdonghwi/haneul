@@ -12,3 +12,8 @@ class TypeError(HaneulError):
 class ArgNumberMismatch(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
+
+
+class UnboundVariable(HaneulError):
+  def __init__(self, message):
+    HaneulError.__init__(self, message)
