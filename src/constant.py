@@ -62,6 +62,9 @@ class Constant:
   def negate(self):
     unary_typeerror(self.type, u"반전")
 
+  def show(self):
+    raise NotImplementedError()
+
 
 class ConstNone(Constant):
   def __init__(self):
@@ -72,6 +75,9 @@ class ConstNone(Constant):
       return ConstBoolean(True)
     else:
       return ConstBoolean(False)
+
+  def show(self):
+    return u"(없음)"
 
 
 class ConstInteger(Constant):
@@ -142,6 +148,9 @@ class ConstInteger(Constant):
   def negate(self):
     return ConstInteger(-self.intval)
 
+  def show(self):
+    return str(self.intval).decode('utf-8')
+
 
 class ConstDouble(Constant):
   def __init__(self, value):
@@ -202,6 +211,9 @@ class ConstDouble(Constant):
     else:
       binary_typeerror(self.type, other.type, u"대소 비교")
 
+  def show(self):
+    return str(self.doubleval).decode('utf-8')
+
 
 class ConstBoolean(Constant):
   def __init__(self, value):
@@ -217,6 +229,9 @@ class ConstBoolean(Constant):
   def negate(self):
     return ConstBoolean(not self.boolval)
 
+  def show(self):
+    return u"참" if self.boolval else u"거짓"
+
 
 class ConstString(Constant):
   def __init__(self, value):
@@ -229,11 +244,17 @@ class ConstString(Constant):
     else:
       return ConstBoolean(False)
 
+  def show(self):
+    return self.stringval
+
 
 class ConstFunc(Constant):
   def __init__(self, value):
     self.funcval = value
     self.type = TYPE_FUNC
+
+  def show(self):
+    return u"(함수)"
 
 
 class ConstBuiltin(Constant):
@@ -241,13 +262,15 @@ class ConstBuiltin(Constant):
     self.builtinval = value
     self.type = TYPE_BUILTIN
 
+  def show(self):
+    return u"(미리 만들어진 값)"
+
 
 class FuncObject:
-  def __init__(self, arity, code, const_table, var_names):
+  def __init__(self, arity, code, const_table):
     self.arity = arity
     self.code = code
     self.const_table = const_table
-    self.var_names = var_names
 
 
 class BuiltinObject:

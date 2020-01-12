@@ -10,7 +10,7 @@ from constant import ConstBuiltin, ConstNone,  BuiltinObject
 
 
 def print_builtin_func(args):
-  print args[0].stringval.encode('utf-8')
+  print args[0].show().encode('utf-8')
   return ConstNone()
 
 
