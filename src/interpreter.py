@@ -60,7 +60,7 @@ class BytecodeInterpreter:
 
           if func_object.arity != inst.operand_int:
             raise ArgNumberMismatch(
-                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습다." % (func_object.arity, inst.operand_int))
+                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
 
           new_slot_start = len(self.stack) - inst.operand_int - 1
           self.call_frames.append(
