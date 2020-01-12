@@ -12,8 +12,8 @@ class CallFrame:
 
 
 class BytecodeInterpreter:
-  def __init__(self, const_table):
-    self.global_vars = {}
+  def __init__(self, const_table, global_vars):
+    self.global_vars = global_vars
 
     self.stack = []
     self.call_frames = [CallFrame(0, const_table)]
@@ -56,19 +56,34 @@ class BytecodeInterpreter:
         elif inst.opcode == INST_CALL:
           # print "CALL"
           callee = self.stack[len(self.stack) - inst.operand_int - 1]
-          if callee.type != TYPE_FUNC:
+
+          if callee.type == TYPE_FUNC:
+            func_object = callee.funcval
+
+            if func_object.arity != inst.operand_int:
+              raise ArgNumberMismatch(
+                  u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
+
+            new_slot_start = len(self.stack) - inst.operand_int - 1
+            self.call_frames.append(
+                CallFrame(new_slot_start, func_object.const_table))
+            self.run(func_object.code)
+          elif callee.type == TYPE_BUILTIN:
+            func_object = callee.builtinval
+
+            if func_object.arity != inst.operand_int:
+              raise ArgNumberMismatch(
+                  u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
+
+            args = []
+            for i in range(inst.operand_int):
+              args.insert(0, self.stack.pop())
+
+            return_val = func_object.func(args)
+            self.stack.append(return_val)
+          else:
             raise NotCallable(
                 u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(callee.type))
-
-          func_object = callee.funcval
-          if func_object.arity != inst.operand_int:
-            raise ArgNumberMismatch(
-                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
-
-          new_slot_start = len(self.stack) - inst.operand_int - 1
-          self.call_frames.append(
-              CallFrame(new_slot_start, func_object.const_table))
-          self.run(func_object.code)
         elif inst.opcode == INST_JMP_FORWARD:
           # print "JMPFORWARD"
           for i in range(inst.operand_int):

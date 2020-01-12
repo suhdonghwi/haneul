@@ -2,7 +2,7 @@
 
 from error import TypeError
 
-types = ['NONE', 'INTEGER', 'REAL', 'STRING', 'BOOLEAN', 'FUNC']
+types = ['NONE', 'INTEGER', 'REAL', 'STRING', 'BOOLEAN', 'FUNC', 'BUILTIN']
 for (i, typename) in enumerate(types):
   globals()['TYPE_' + typename] = i
 
@@ -18,6 +18,8 @@ def get_type_name(t):
     return u"참 또는 거짓"
   elif t == TYPE_FUNC:
     return u"함수"
+  elif t == TYPE_BUILTIN:
+    return u"미리 만들어진 값"
   else:
     return u"(없음)"
 
@@ -234,9 +236,21 @@ class ConstFunc(Constant):
     self.type = TYPE_FUNC
 
 
+class ConstBuiltin(Constant):
+  def __init__(self, value):
+    self.builtinval = value
+    self.type = TYPE_BUILTIN
+
+
 class FuncObject:
   def __init__(self, arity, code, const_table, var_names):
     self.arity = arity
     self.code = code
     self.const_table = const_table
     self.var_names = var_names
+
+
+class BuiltinObject:
+  def __init__(self, arity, func):
+    self.arity = arity
+    self.func = func
