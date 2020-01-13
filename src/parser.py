@@ -7,7 +7,6 @@ from rpython.rlib.rarithmetic import intmask
 
 from instruction import *
 from constant import *
-from dump import dump_constant, dump_inst
 from interpreter import BytecodeInterpreter
 
 

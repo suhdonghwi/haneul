@@ -1,30 +1,18 @@
 # -*- coding: utf-8 -*-
-
 import os
 
 from interpreter import BytecodeInterpreter
 from parser import BytecodeParser
 from error import HaneulError
 
-from constant import ConstBuiltin, ConstNone,  BuiltinObject
-
-
-def print_builtin_func(args):
-  print args[0].show().encode('utf-8')
-  return ConstNone()
-
-
-print_builtin = ConstBuiltin(BuiltinObject(1, print_builtin_func))
-default_globals = {
-    u'보여주다': print_builtin
-}
+from environment import default_globals
 
 
 def entry_point(argv):
   try:
     filename = argv[1]
   except IndexError:
-    print "Give me the file!"
+    print "파일이 필요합니다."
     return 1
 
   fp = os.open(filename, os.O_RDONLY, 0777)
@@ -44,6 +32,7 @@ def entry_point(argv):
     interpreter.run(code)
   except HaneulError as e:
     print (u"에러 발생 @ %d : %s" % (e.error_line, e.message)).encode('utf-8')
+
   return 0
 
 
