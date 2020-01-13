@@ -57,21 +57,13 @@ class BytecodeParser:
     return runpack(">Q", self.consume_raw(8))
 
   def parse_integer(self):
-    is_bigint = self.consume_ubyte()
-    if is_bigint == 0:
-      data = self.consume_int()
-      return ConstInteger(data)
-    else:
-      sign = self.consume_byte()
-      bytes_count = self.consume_ulonglong()
-      data = self.consume_raw_reverse(bytes_count)
-      value = ConstInteger(bytes_to_int(bytearray(data), bytes_count))
-      return value if sign == 1 else value.negate()
+    data = self.consume_longlong()
+    return ConstInteger(data)
 
   def parse_double(self):
-    base = self.parse_integer().intval
+    base = self.consume_longlong()
     exp = self.consume_longlong()
-    return ConstDouble(math.pow(base * 2, exp))
+    return ConstDouble(base * math.pow(2, exp))
 
   def parse_char(self):
     head = self.consume_ubyte()
