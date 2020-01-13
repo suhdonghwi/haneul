@@ -88,6 +88,10 @@ class BytecodeInterpreter:
           # print "JMPFORWARD"
           i += inst.operand_int + 1
           continue
+        elif inst.opcode == INST_JMP_BACKWARD:
+          # print "JMPBACKWARD"
+          i -= inst.operand_int
+          continue
         elif inst.opcode == INST_POP_JMP_IF_FALSE:
           # print "POPJMPIFFALSE"
           value = self.stack.pop().boolval
