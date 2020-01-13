@@ -160,17 +160,11 @@ class BytecodeParser:
 
     return ConstFunc(FuncObject(arity, insts, const_table))
 
-  def parse_buildinternal(self):
-    const_table = self.parse_constant_list()
-    var_names = self.parse_string_list()
-
-    return (const_table, var_names)
-
   def parse_code(self):
-    (const_table, var_names) = self.parse_buildinternal()
+    const_table = self.parse_constant_list()
     code = self.parse_instruction_list()
 
-    return (const_table, var_names, code)
+    return (const_table, code)
 
 
 """
