@@ -3,7 +3,6 @@
 from instruction import *
 from constant import *
 from error import HaneulError, ArgNumberMismatch, UnboundVariable, CannotReturn, NotCallable
-from rpython.rlib.rarithmetic import r_uint
 
 
 class CallFrame:
