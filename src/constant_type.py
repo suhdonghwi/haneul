@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-types = ['NONE', 'INTEGER', 'REAL', 'STRING', 'BOOLEAN', 'FUNC', 'BUILTIN']
+from error import TypeError
+
+types = ['NONE', 'INTEGER', 'REAL', 'STRING',
+         'BOOLEAN', 'FUNC', 'BUILTIN', 'LIST']
 for (i, typename) in enumerate(types):
   globals()['TYPE_' + typename] = i
 
@@ -17,6 +20,8 @@ def get_type_name(t):
     return u"함수"
   elif t == TYPE_BUILTIN:
     return u"미리 만들어진 값"
+  elif t == TYPE_LIST:
+    return u"목록"
   else:
     return u"(없음)"
 

@@ -138,6 +138,13 @@ def run_code(program, code):
         program.call_frames.pop()
         program.push(return_value)
         break
+      elif inst.opcode == INST_BUILD_LIST:
+        list_value = []
+
+        for _ in range(inst.operand_int):
+          list_value.insert(0, program.pop())
+
+        program.push(ConstList(list_value))
       elif inst.opcode == INST_NEGATE:
         # print "NEGATE"
         value = program.pop()

@@ -7,7 +7,7 @@ from constant_type import *
 
 class Constant:
   _immutable_fields_ = ['intval', 'doubleval', 'boolval',
-                        'stringval', 'funcval', 'builtinval', 'type']
+                        'stringval', 'funcval', 'builtinval', 'listval', 'type']
 
   def add(self, other):
     binary_typeerror(self.type, other.type, u"더하기")
@@ -252,6 +252,35 @@ class ConstBuiltin(Constant):
 
   def show(self):
     return u"(미리 만들어진 값)"
+
+
+class ConstList(Constant):
+  _immutable_fields_ = ['listval', 'type']
+
+  def __init__(self, value):
+    self.listval = value
+    self.type = TYPE_LIST
+
+  def add(self, other):
+    if other.type == TYPE_LIST:
+      return ConstList(self.listval + other.listval)
+    else:
+      binary_typeerror(self.type, other.type, u"더하기")
+
+  def equal(self, other):
+    if other.type == TYPE_LIST:
+      return ConstBoolean(self.listval == other.listval)
+    else:
+      return ConstBoolean(False)
+
+  def show(self):
+    result = u"["
+
+    for item in self.listval:
+      result += item.show() + u", "
+
+    result += u"]"
+    return result
 
 
 class FuncObject:
