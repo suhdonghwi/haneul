@@ -38,3 +38,8 @@ def entry_point(argv):
 
 def target(*args):
   return entry_point, None
+
+
+def jitpolicy(driver):
+  from rpython.jit.codewriter.policy import JitPolicy
+  return JitPolicy()

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+from rpython.rlib.jit import JitDriver
 
 from instruction import *
 from constant import *
 from error import HaneulError, ArgNumberMismatch, UnboundVariable, CannotReturn, NotCallable
+
+
+jitdriver = JitDriver(greens=['pc', 'code'],
+                      reds=['program'])
 
 
 class CallFrame:
@@ -34,6 +39,8 @@ class Program:
 def run_code(program, code):
   pc = 0
   while pc < len(code):
+    jitdriver.jit_merge_point(pc=pc, code=code, program=program)
+
     inst = code[pc]
     try:
       if inst.opcode == INST_PUSH:
