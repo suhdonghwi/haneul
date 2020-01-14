@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from interpreter import BytecodeInterpreter
+from interpreter import Program, run_code
 from parser import BytecodeParser
 from error import HaneulError
 
@@ -27,9 +27,9 @@ def entry_point(argv):
   parser = BytecodeParser(content)
   (const_table, code) = parser.parse_code()
 
-  interpreter = BytecodeInterpreter(const_table, default_globals)
+  program = Program(const_table, default_globals)
   try:
-    interpreter.run(code)
+    run_code(program, code)
   except HaneulError as e:
     print (u"%d번째 라인에서 에러 발생 : %s" % (e.error_line, e.message)).encode('utf-8')
 

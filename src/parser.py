@@ -7,7 +7,6 @@ from rpython.rlib.rarithmetic import intmask
 
 from instruction import *
 from constant import *
-from interpreter import BytecodeInterpreter
 
 
 def bytes_to_int(data, length):
