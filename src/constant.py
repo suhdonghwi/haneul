@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+from rpython.rlib import jit
+
 from error import TypeError
 from constant_type import *
 
 
 class Constant:
+  _immutable_fields_ = ['intval', 'doubleval', 'boolval',
+                        'stringval', 'funcval', 'builtinval', 'type']
+
   def add(self, other):
     binary_typeerror(self.type, other.type, u"더하기")
 
@@ -36,6 +41,8 @@ class Constant:
 
 
 class ConstNone(Constant):
+  _immutable_fields_ = ['type']
+
   def __init__(self):
     self.type = TYPE_NONE
 
@@ -50,6 +57,8 @@ class ConstNone(Constant):
 
 
 class ConstInteger(Constant):
+  _immutable_fields_ = ['intval', 'type']
+
   def __init__(self, value):
     self.intval = value
     self.type = TYPE_INTEGER
@@ -122,6 +131,8 @@ class ConstInteger(Constant):
 
 
 class ConstDouble(Constant):
+  _immutable_fields_ = ['doubleval', 'type']
+
   def __init__(self, value):
     self.doubleval = value
     self.type = TYPE_REAL
@@ -185,6 +196,8 @@ class ConstDouble(Constant):
 
 
 class ConstBoolean(Constant):
+  _immutable_fields_ = ['boolval', 'type']
+
   def __init__(self, value):
     self.boolval = value
     self.type = TYPE_BOOLEAN
@@ -203,6 +216,8 @@ class ConstBoolean(Constant):
 
 
 class ConstString(Constant):
+  _immutable_fields_ = ['stringval', 'type']
+
   def __init__(self, value):
     self.stringval = value
     self.type = TYPE_STRING
@@ -218,6 +233,8 @@ class ConstString(Constant):
 
 
 class ConstFunc(Constant):
+  _immutable_fields_ = ['funcval', 'type']
+
   def __init__(self, value):
     self.funcval = value
     self.type = TYPE_FUNC
@@ -227,6 +244,8 @@ class ConstFunc(Constant):
 
 
 class ConstBuiltin(Constant):
+  _immutable_fields_ = ['builtinval', 'type']
+
   def __init__(self, value):
     self.builtinval = value
     self.type = TYPE_BUILTIN
@@ -236,6 +255,8 @@ class ConstBuiltin(Constant):
 
 
 class FuncObject:
+  _immutable_fields_ = ['arity', 'code', 'const_table']
+
   def __init__(self, arity, code, const_table):
     self.arity = arity
     self.code = code
@@ -243,6 +264,8 @@ class FuncObject:
 
 
 class BuiltinObject:
+  _immutable_fields_ = ['arity', 'func']
+
   def __init__(self, arity, func):
     self.arity = arity
     self.func = func

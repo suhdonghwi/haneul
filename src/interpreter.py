@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from rpython.rlib.jit import JitDriver
+from rpython.rlib.jit import JitDriver, promote, elidable
 
 from instruction import *
 from constant import *
@@ -11,12 +11,20 @@ jitdriver = JitDriver(greens=['pc', 'code'],
 
 
 class CallFrame:
+  _immutable_fields_ = ['slot_start', 'const_table']
+
   def __init__(self, slot_start, const_table):
     self.slot_start = slot_start
     self.const_table = const_table
 
+  @elidable
+  def const(self, index):
+    return self.const_table[index]
+
 
 class Program:
+  _immutable_fields_ = ['global_vars', 'call_frames', 'stack']
+
   def __init__(self, const_table, global_vars):
     self.global_vars = global_vars
     self.call_frames = [CallFrame(0, const_table)]
@@ -37,15 +45,18 @@ class Program:
 
 
 def run_code(program, code):
+  program = promote(program)
+
   pc = 0
   while pc < len(code):
     jitdriver.jit_merge_point(pc=pc, code=code, program=program)
 
     inst = code[pc]
+    inst = promote(inst)
     try:
       if inst.opcode == INST_PUSH:
         # print "PUSH"
-        program.push(program.current_frame().const_table[inst.operand_int])
+        program.push(program.current_frame().const(inst.operand_int))
       elif inst.opcode == INST_POP:
         # print "POP"
         program.pop()
@@ -107,6 +118,7 @@ def run_code(program, code):
       elif inst.opcode == INST_JMP_BACKWARD:
         # print "JMPBACKWARD"
         pc -= inst.operand_int
+        jitdriver.can_enter_jit(pc=pc, code=code, program=program)
         continue
       elif inst.opcode == INST_POP_JMP_IF_FALSE:
         # print "POPJMPIFFALSE"
