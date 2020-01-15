@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import jit
 
-from error import TypeError
+from error import InvalidType
 from constant_type import *
 
 

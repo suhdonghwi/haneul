@@ -3,7 +3,7 @@ from rpython.rlib.jit import JitDriver, promote, elidable
 
 from instruction import *
 from constant import *
-from error import HaneulError, ArgNumberMismatch, UnboundVariable, CannotReturn, NotCallable
+from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, CannotReturn, NotCallable
 
 
 jitdriver = JitDriver(greens=['pc', 'code'],
@@ -122,8 +122,11 @@ def run_code(program, code):
         continue
       elif inst.opcode == INST_POP_JMP_IF_FALSE:
         # print "POPJMPIFFALSE"
-        value = program.pop().boolval
-        if value == False:
+        value = program.pop()
+        if value.type != TYPE_BOOLEAN:
+          raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
+
+        if value.boolval == False:
           pc += inst.operand_int + 1
           continue
       elif inst.opcode == INST_RETURN:

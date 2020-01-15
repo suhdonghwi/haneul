@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from error import TypeError
+from error import InvalidType
 
 types = ['NONE', 'INTEGER', 'REAL', 'STRING',
          'BOOLEAN', 'FUNC', 'BUILTIN', 'LIST']
@@ -27,10 +27,10 @@ def get_type_name(t):
 
 
 def binary_typeerror(type1, type2, operation):
-  raise TypeError(u"%s 타입의 값과 %s 타입의 값은 %s 연산을 지원하지 않습니다." %
-                  (get_type_name(type1), get_type_name(type2), operation))
+  raise InvalidType(u"%s 타입의 값과 %s 타입의 값은 %s 연산을 지원하지 않습니다." %
+                    (get_type_name(type1), get_type_name(type2), operation))
 
 
 def unary_typeerror(type1, operation):
-  raise TypeError(u"%s 타입의 값은 %s 연산을 지원하지 않습니다." %
-                  (get_type_name(type1), operation))
+  raise InvalidType(u"%s 타입의 값은 %s 연산을 지원하지 않습니다." %
+                    (get_type_name(type1), operation))

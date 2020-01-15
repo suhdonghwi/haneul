@@ -4,7 +4,7 @@ class HaneulError(Exception):
     self.error_line = 0
 
 
-class TypeError(HaneulError):
+class InvalidType(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
 
