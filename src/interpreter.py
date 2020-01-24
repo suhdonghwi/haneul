@@ -111,13 +111,9 @@ def run_code(program, code):
         else:
           raise NotCallable(
               u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(callee.type))
-      elif inst.opcode == INST_JMP_FORWARD:
-        # print "JMPFORWARD"
-        pc += inst.operand_int + 1
-        continue
-      elif inst.opcode == INST_JMP_BACKWARD:
-        # print "JMPBACKWARD"
-        pc -= inst.operand_int
+      elif inst.opcode == INST_JMP:
+        # print "JMP"
+        pc = inst.operand_int
         jitdriver.can_enter_jit(pc=pc, code=code, program=program)
         continue
       elif inst.opcode == INST_POP_JMP_IF_FALSE:
@@ -127,7 +123,7 @@ def run_code(program, code):
           raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
 
         if value.boolval == False:
-          pc += inst.operand_int + 1
+          pc = inst.operand_int
           continue
       elif inst.opcode == INST_RETURN:
         # print "RETURN"
