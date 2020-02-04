@@ -1,5 +1,5 @@
-instructions = ['PUSH', 'POP', 'STORE', 'STORE_GLOBAL', 'LOAD', 'LOAD_GLOBAL', 'CALL', 'JMP', 'POP_JMP_IF_FALSE',
-                'RETURN', 'ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE', 'MOD', 'EQUAL', 'LESS_THAN', 'GREATER_THAN', 'NEGATE', 'BUILD_LIST']
+instructions = ['PUSH', 'POP', 'STORE', 'LOAD', 'POP_NAME', 'CALL', 'JMP', 'POP_JMP_IF_FALSE',
+                'ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE', 'MOD', 'EQUAL', 'LESS_THAN', 'GREATER_THAN', 'NEGATE']
 for (i, inst) in enumerate(instructions):
   globals()['INST_' + inst] = i
 
