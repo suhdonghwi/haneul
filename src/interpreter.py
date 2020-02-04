@@ -65,21 +65,23 @@ def run_code(program, code):
         store_index = program.current_frame().slot_start + inst.operand_int + 1
         if store_index != len(program.stack) - 1:
           program.stack[store_index] = program.pop()
-      elif inst.opcode == INST_STORE_GLOBAL:
-        # print "STORE_GLOBAL"
-        program.global_vars[inst.operand_str] = program.pop()
+      # elif inst.opcode == INST_STORE_GLOBAL:
+      #   # print "STORE_GLOBAL"
+      #   program.global_vars[inst.operand_str] = program.pop()
       elif inst.opcode == INST_LOAD:
         # print "LOAD"
         program.push(
             program.stack[program.current_frame().slot_start + inst.operand_int + 1])
-      elif inst.opcode == INST_LOAD_GLOBAL:
-        # print "LOAD_GLOBAL"
-        if inst.operand_str in program.global_vars:
-          program.push(program.global_vars[inst.operand_str])
-        else:
-          raise UnboundVariable(
-              u"변수 '%s'을(를) 찾을 수 없습니다." % inst.operand_str)
+      # elif inst.opcode == INST_LOAD_GLOBAL:
+      #   # print "LOAD_GLOBAL"
+      #   if inst.operand_str in program.global_vars:
+      #     program.push(program.global_vars[inst.operand_str])
+      #   else:
+      #     raise UnboundVariable(
+      #         u"변수 '%s'을(를) 찾을 수 없습니다." % inst.operand_str)
 
+      elif inst.opcode == INST_POP_NAME:
+        continue
       elif inst.opcode == INST_CALL:
         # print "CALL"
         callee = program.peek(inst.operand_int + 1)
@@ -125,25 +127,25 @@ def run_code(program, code):
         if value.boolval == False:
           pc = inst.operand_int
           continue
-      elif inst.opcode == INST_RETURN:
-        # print "RETURN"
-        if len(program.call_frames) <= 1:
-          raise CannotReturn(u"여기에서는 값을 반환할 수 없습니다.")
+      # elif inst.opcode == INST_RETURN:
+      #   # print "RETURN"
+      #   if len(program.call_frames) <= 1:
+      #     raise CannotReturn(u"여기에서는 값을 반환할 수 없습니다.")
 
-        return_value = program.pop()
-        for _ in range(len(program.stack) - program.current_frame().slot_start):
-          program.pop()
+      #   return_value = program.pop()
+      #   for _ in range(len(program.stack) - program.current_frame().slot_start):
+      #     program.pop()
 
-        program.call_frames.pop()
-        program.push(return_value)
-        break
-      elif inst.opcode == INST_BUILD_LIST:
-        list_value = []
+      #   program.call_frames.pop()
+      #   program.push(return_value)
+      #   break
+      # elif inst.opcode == INST_BUILD_LIST:
+      #   list_value = []
 
-        for _ in range(inst.operand_int):
-          list_value.insert(0, program.pop())
+      #   for _ in range(inst.operand_int):
+      #     list_value.insert(0, program.pop())
 
-        program.push(ConstList(list_value))
+      #   program.push(ConstList(list_value))
       elif inst.opcode == INST_NEGATE:
         # print "NEGATE"
         value = program.pop()
