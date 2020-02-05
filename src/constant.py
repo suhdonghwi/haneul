@@ -7,7 +7,7 @@ from constant_type import *
 
 class Constant:
   _immutable_fields_ = ['intval', 'doubleval', 'boolval',
-                        'stringval', 'funcval', 'builtinval', 'listval', 'type']
+                        'charval', 'funcval', 'builtinval', 'type']
 
   def add(self, other):
     binary_typeerror(self.type, other.type, u"더하기")
@@ -215,21 +215,21 @@ class ConstBoolean(Constant):
     return u"참" if self.boolval else u"거짓"
 
 
-class ConstString(Constant):
-  _immutable_fields_ = ['stringval', 'type']
+class ConstChar(Constant):
+  _immutable_fields_ = ['charval', 'type']
 
   def __init__(self, value):
-    self.stringval = value
-    self.type = TYPE_STRING
+    self.charval = value
+    self.type = TYPE_CHAR
 
   def equal(self, other):
-    if other.type == TYPE_STRING:
-      return ConstBoolean(self.stringval == other.stringval)
+    if other.type == TYPE_CHAR:
+      return ConstBoolean(self.charval == other.charval)
     else:
       return ConstBoolean(False)
 
   def show(self):
-    return self.stringval
+    return self.charval
 
 
 class ConstFunc(Constant):
@@ -284,10 +284,10 @@ class ConstList(Constant):
 
 
 class FuncObject:
-  _immutable_fields_ = ['arity', 'code', 'const_table']
+  _immutable_fields_ = ['arg_names', 'code', 'const_table']
 
-  def __init__(self, arity, code, const_table):
-    self.arity = arity
+  def __init__(self, arg_names, code, const_table):
+    self.arg_names = arg_names
     self.code = code
     self.const_table = const_table
 

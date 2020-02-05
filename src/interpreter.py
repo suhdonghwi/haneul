@@ -11,10 +11,9 @@ jitdriver = JitDriver(greens=['pc', 'code'],
 
 
 class CallFrame:
-  _immutable_fields_ = ['slot_start', 'const_table']
+  _immutable_fields_ = ['const_table']
 
-  def __init__(self, slot_start, const_table):
-    self.slot_start = slot_start
+  def __init__(self, const_table):
     self.const_table = const_table
 
   @elidable
@@ -23,11 +22,11 @@ class CallFrame:
 
 
 class Program:
-  _immutable_fields_ = ['global_vars', 'call_frames', 'stack']
+  _immutable_fields_ = ['var_list', 'const_table', 'stack']
 
-  def __init__(self, const_table, global_vars):
-    self.global_vars = global_vars
-    self.call_frames = [CallFrame(0, const_table)]
+  def __init__(self, const_table, var_list):
+    self.var_list = var_list
+    self.const_table = const_table
 
     self.stack = []
 
@@ -38,10 +37,15 @@ class Program:
     return self.stack.pop()
 
   def peek(self, n=0):
-    return self.stack[len(self.stack) - n]
+    return self.stack[len(self.stack) - n - 1]
 
-  def current_frame(self):
-    return self.call_frames[-1]
+  def find_var(self, var_name):
+    for i in range(len(self.var_list) - 1, -1, -1):
+      var = self.var_list[i]
+      if var[0] == var_name:
+        return var[1]
+
+    return None
 
 
 def run_code(program, code):
@@ -56,47 +60,54 @@ def run_code(program, code):
     try:
       if inst.opcode == INST_PUSH:
         # print "PUSH"
-        program.push(program.current_frame().const(inst.operand_int))
+        program.push(program.const_table[inst.operand_int])
+
       elif inst.opcode == INST_POP:
         # print "POP"
         program.pop()
+
       elif inst.opcode == INST_STORE:
         # print "STORE"
-        store_index = program.current_frame().slot_start + inst.operand_int + 1
-        if store_index != len(program.stack) - 1:
-          program.stack[store_index] = program.pop()
-      # elif inst.opcode == INST_STORE_GLOBAL:
-      #   # print "STORE_GLOBAL"
-      #   program.global_vars[inst.operand_str] = program.pop()
+        program.var_list.append((inst.operand_str, program.pop()))
+
       elif inst.opcode == INST_LOAD:
         # print "LOAD"
-        program.push(
-            program.stack[program.current_frame().slot_start + inst.operand_int + 1])
-      # elif inst.opcode == INST_LOAD_GLOBAL:
-      #   # print "LOAD_GLOBAL"
-      #   if inst.operand_str in program.global_vars:
-      #     program.push(program.global_vars[inst.operand_str])
-      #   else:
-      #     raise UnboundVariable(
-      #         u"변수 '%s'을(를) 찾을 수 없습니다." % inst.operand_str)
+        result = program.find_var(inst.operand_str)
+        if result is None:
+          # print inst.operand_str
+          raise UnboundVariable(u"상수 %s를 찾을 수 없습니다." % inst.operand_str)
+        program.push(result)
 
       elif inst.opcode == INST_POP_NAME:
-        continue
+        program.var_list.pop()
+
       elif inst.opcode == INST_CALL:
         # print "CALL"
-        callee = program.peek(inst.operand_int + 1)
+        args = []
+        given_arity = inst.operand_int
+
+        for _ in range(given_arity):
+          args.insert(0, program.pop())
+
+        callee = program.pop()
 
         if callee.type == TYPE_FUNC:
           func_object = callee.funcval
 
-          if func_object.arity != inst.operand_int:
+          arity = len(func_object.arg_names)
+          if arity != given_arity:
             raise ArgNumberMismatch(
-                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
+                u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (arity, given_arity))
 
-          new_slot_start = len(program.stack) - inst.operand_int - 1
-          program.call_frames.append(
-              CallFrame(new_slot_start, func_object.const_table))
-          run_code(program, func_object.code)
+          new_var_list = []
+          for i, arg in enumerate(args):
+            new_var_list.append((func_object.arg_names[i], arg))
+
+          func_program = Program(func_object.const_table,
+                                 program.var_list + new_var_list)
+          result = run_code(func_program, func_object.code)
+          program.push(result.pop())
+
         elif callee.type == TYPE_BUILTIN:
           func_object = callee.builtinval
 
@@ -104,20 +115,18 @@ def run_code(program, code):
             raise ArgNumberMismatch(
                 u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
 
-          args = []
-          for _ in range(inst.operand_int):
-            args.insert(0, program.pop())
-
           return_val = func_object.func(args)
           program.push(return_val)
         else:
           raise NotCallable(
               u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(callee.type))
+
       elif inst.opcode == INST_JMP:
         # print "JMP"
         pc = inst.operand_int
-        jitdriver.can_enter_jit(pc=pc, code=code, program=program)
+        # jitdriver.can_enter_jit(pc=pc, code=code, program=program)
         continue
+
       elif inst.opcode == INST_POP_JMP_IF_FALSE:
         # print "POPJMPIFFALSE"
         value = program.pop()
@@ -127,6 +136,7 @@ def run_code(program, code):
         if value.boolval == False:
           pc = inst.operand_int
           continue
+
       # elif inst.opcode == INST_RETURN:
       #   # print "RETURN"
       #   if len(program.call_frames) <= 1:
@@ -146,6 +156,7 @@ def run_code(program, code):
       #     list_value.insert(0, program.pop())
 
       #   program.push(ConstList(list_value))
+
       elif inst.opcode == INST_NEGATE:
         # print "NEGATE"
         value = program.pop()
@@ -183,7 +194,9 @@ def run_code(program, code):
         e.error_line = inst.line_number
       raise e
 
-    """
+  return program
+
+  """
     # print "[",
     for c in self.stack:
       if c.type == TYPE_INTEGER:

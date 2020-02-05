@@ -8,6 +8,4 @@ def print_builtin_func(args):
 
 
 print_builtin = ConstBuiltin(BuiltinObject(1, print_builtin_func))
-default_globals = {
-    u'보여주다': print_builtin
-}
+default_globals = [(u'보여주다', print_builtin)]

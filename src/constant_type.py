@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from error import InvalidType
 
-types = ['NONE', 'INTEGER', 'REAL', 'STRING',
+types = ['NONE', 'INTEGER', 'REAL', 'CHAR',
          'BOOLEAN', 'FUNC', 'BUILTIN', 'LIST']
 for (i, typename) in enumerate(types):
   globals()['TYPE_' + typename] = i
@@ -12,8 +12,8 @@ def get_type_name(t):
     return u"정수"
   elif t == TYPE_REAL:
     return u"실수"
-  elif t == TYPE_STRING:
-    return u"문자열"
+  elif t == TYPE_CHAR:
+    return u"문자"
   elif t == TYPE_BOOLEAN:
     return u"참 또는 거짓"
   elif t == TYPE_FUNC:
