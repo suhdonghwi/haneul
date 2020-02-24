@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from rpython.rlib.jit import JitDriver, promote, elidable
+from rpython.rlib import jit
 
 from instruction import *
 from constant import *
 from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa
 
 
-jitdriver = JitDriver(greens=['pc', 'frame'],
-                      reds=['stack', 'call_stack', 'global_vars', 'global_var_names'])
+jitdriver = jit.JitDriver(greens=['pc', 'frame'],
+                          reds=['stack', 'call_stack', 'global_vars', 'global_var_names'])
 
 
 class CallFrame:
@@ -21,35 +21,13 @@ class CallFrame:
     self.free_vars = free_list
     self.slot_start = slot_index
 
-  @elidable
+  @jit.elidable
   def get_constant(self, index):
     return self.const_table[index]
 
 
-# class Program:
-#   def __init__(self, global_var_names, global_vars, frame):
-#     self.global_var_names = global_var_names
-#     self.global_vars = global_vars + [None] *\
-#         (len(global_var_names) - len(global_vars))
-
-#     self.stack = []
-#     self.call_stack = [frame]
-
-#   def push(self, v):
-#     self.stack.append(v)
-
-#   def pop(self):
-#     return self.stack.pop()
-
-#   def peek(self, n=0):
-#     return self.stack[len(self.stack) - n - 1]
-
-#   def current_frame(self):
-#     return self.call_stack[-1]
-
-
 def run(global_var_names, global_vars, frame):
-  global_var_names = promote(global_var_names)
+  global_var_names = jit.promote(global_var_names)
   global_vars = global_vars + [None] *\
       (len(global_var_names) - len(global_vars))
 
@@ -77,7 +55,7 @@ def run(global_var_names, global_vars, frame):
         stack=stack, call_stack=call_stack)
 
     inst = frame.code[frame.pc]
-    inst = promote(inst)
+    inst = jit.promote(inst)
     try:
       if inst.opcode == INST_PUSH:
         # print "PUSH"
@@ -110,28 +88,43 @@ def run(global_var_names, global_vars, frame):
         given_arity = len(inst.operand_str)
 
         value = stack.pop()
+        josa_map = list(value.josa_map)
         if value.type == TYPE_FUNC:
-          for (i, josa) in enumerate(inst.operand_str):
+          for josa in inst.operand_str:
             if josa == u"_":
-              for (k, v) in value.josa_map.iteritems():
+              found = False
+              for (j, (k, v)) in enumerate(josa_map):
                 if v is None:
-                  value.josa_map[k] = stack.pop()
+                  josa_map[j] = (k, stack.pop())
+                  found = True
                   break
+
+              if not found:
+                raise InvalidType(u"이 함수에는 더 이상 값을 적용할 수 없습니다.")
+                return
             else:
-              if josa in value.josa_map:
-                value.josa_map[josa] = stack.pop()
-              else:
+              found = False
+              for (j, (k, v)) in enumerate(josa_map):
+                if josa == k:
+                  josa_map[j] = (josa, stack.pop())
+                  found = True
+                  break
+
+              if not found:
                 raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
                 return
 
-          args = value.josa_map.values()
+          args = []
           rest_arity = 0
-          for v in args:
+          for (_, v) in josa_map:
+            args.append(v)
             if v is None:
               rest_arity += 1
 
           if rest_arity > 0:
-            stack.append(value)
+            func = ConstFunc([], value.funcval, value.builtinval)
+            func.josa_map = josa_map
+            stack.append(func)
           else:  # rest_arity == 0
             if value.builtinval is None:
               func_object = value.funcval
@@ -140,9 +133,9 @@ def run(global_var_names, global_vars, frame):
               stack.extend(args)
               call_stack.append(func_frame)
 
-              jitdriver.can_enter_jit(
-                  pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
-                  stack=stack, call_stack=call_stack)
+              # jitdriver.can_enter_jit(
+              #     pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
+              #     stack=stack, call_stack=call_stack)
             else:
               func_result = value.builtinval(args)
               stack.append(func_result)

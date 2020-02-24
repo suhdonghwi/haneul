@@ -236,9 +236,9 @@ class ConstFunc(Constant):
   _immutable_fields_ = ['funcval', 'type']
 
   def __init__(self, josa_list, value, builtin_func=None):
-    self.josa_map = {}
+    self.josa_map = []
     for josa in josa_list:
-      self.josa_map[josa] = None
+      self.josa_map.append((josa, None))
 
     self.funcval = value
     self.builtinval = builtin_func
