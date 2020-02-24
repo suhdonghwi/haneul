@@ -1,4 +1,5 @@
-instructions = ['PUSH', 'POP', 'STORE', 'LOAD', 'POP_NAME', 'CALL', 'JMP', 'POP_JMP_IF_FALSE',
+instructions = ['PUSH', 'POP', 'LOAD', 'LOAD_DEREF', 'STORE_GLOBAL', 'LOAD_GLOBAL',
+                'CALL', 'JMP', 'POP_JMP_IF_FALSE', 'FREE_VAR_LOCAL', 'FREE_VAR_FREE',
                 'ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE', 'MOD', 'EQUAL', 'LESS_THAN', 'GREATER_THAN', 'NEGATE']
 for (i, inst) in enumerate(instructions):
   globals()['INST_' + inst] = i

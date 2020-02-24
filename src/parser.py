@@ -50,14 +50,16 @@ class BytecodeParser:
   def consume_ulonglong(self):
     return runpack(">Q", self.consume_raw(8))
 
+  def consume_double(self):
+    return runpack(">d", self.consume_raw(8))
+
   def parse_integer(self):
     data = self.consume_longlong()
     return ConstInteger(data)
 
   def parse_double(self):
-    base = self.consume_longlong()
-    exp = self.consume_longlong()
-    return ConstDouble(base * math.pow(2, exp))
+    data = self.consume_double()
+    return ConstDouble()
 
   def parse_char(self):
     head = self.consume_ubyte()
