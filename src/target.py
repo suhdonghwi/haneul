@@ -29,7 +29,7 @@ def entry_point(argv):
   (global_var_names, const_table, code) = parser.parse_code()
 
   frame = CallFrame(const_table, code, [], 0)
-  program = Program(global_var_names, [ConstInteger(1)])
+  program = Program(global_var_names, default_globals)
   try:
     program.run(frame)
   except HaneulError as e:

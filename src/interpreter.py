@@ -105,19 +105,24 @@ class Program:
             if rest_arity > 0:
               self.push(value)
             else:  # rest_arity == 0
-              func_object = value.funcval
-              func_frame = CallFrame(func_object.const_table, func_object.code,
-                                     func_object.free_vars, len(self.stack))
-              self.stack.extend(args)
+              if value.builtinval is None:
+                func_object = value.funcval
+                func_frame = CallFrame(func_object.const_table, func_object.code,
+                                       func_object.free_vars, len(self.stack))
+                self.stack.extend(args)
 
-              self.run(func_frame)
+                self.run(func_frame)
 
-              func_result = self.pop()
+                func_result = self.pop()
 
-              for _ in range(len(args)):
-                self.pop()
+                for _ in range(len(args)):
+                  self.pop()
 
-              self.push(func_result)
+                self.push(func_result)
+              else:
+                func_result = value.builtinval(args)
+                self.push(func_result)
+
           else:
             raise NotCallable(
                 u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(value.type))
