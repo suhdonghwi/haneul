@@ -59,7 +59,7 @@ class BytecodeParser:
 
   def parse_double(self):
     data = self.consume_double()
-    return ConstDouble()
+    return ConstDouble(data)
 
   def parse_char(self):
     head = self.consume_ubyte()
@@ -85,6 +85,15 @@ class BytecodeParser:
 
     return result
 
+  def parse_string_ubyte(self):
+    count = self.consume_ubyte()
+
+    result = u''
+    for i in range(count):
+      result += self.parse_char().charval
+
+    return result
+
   def parse_boolean(self):
     value = self.consume_ubyte()
     return ConstBoolean(value == 1)
@@ -94,10 +103,12 @@ class BytecodeParser:
     opcode = self.consume_ubyte()
 
     inst = Instruction(line_number, opcode)
-    if opcode in (INST_PUSH, INST_CALL, INST_JMP, INST_POP_JMP_IF_FALSE):
-      inst.operand_int = self.consume_int()
-    elif opcode in (INST_STORE, INST_LOAD):
-      inst.operand_str = self.parse_string()
+    if opcode in (INST_PUSH, INST_LOAD, INST_LOAD_DEREF, INST_STORE_GLOBAL, INST_LOAD_GLOBAL):
+      inst.operand_int = self.consume_uint()
+    elif opcode in (INST_FREE_VAR_LOCAL, INST_FREE_VAR_FREE):
+      inst.operand_int = self.consume_ubyte()
+    elif opcode == INST_CALL:
+      inst.operand_str = self.parse_josa_list()
 
     return inst
 
@@ -138,6 +149,15 @@ class BytecodeParser:
     result = []
     for i in range(0, count):
       result.append(self.parse_string())
+
+    return result
+
+  def parse_josa_list(self):
+    count = self.consume_ubyte()
+
+    result = []
+    for i in range(0, count):
+      result.append(self.parse_string_ubyte())
 
     return result
 

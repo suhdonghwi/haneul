@@ -7,7 +7,7 @@ from constant_type import *
 
 class Constant:
   _immutable_fields_ = ['intval', 'doubleval', 'boolval',
-                        'charval', 'funcval', 'builtinval', 'type']
+                        'charval', 'funcval', 'type']
 
   def add(self, other):
     binary_typeerror(self.type, other.type, u"더하기")
@@ -233,9 +233,10 @@ class ConstChar(Constant):
 
 
 class ConstFunc(Constant):
-  _immutable_fields_ = ['funcval', 'type']
+  _immutable_fields_ = ['arity', 'funcval', 'type']
 
-  def __init__(self, value):
+  def __init__(self, arity, value):
+    self.arity = arity
     self.funcval = value
     self.type = TYPE_FUNC
 
@@ -243,58 +244,17 @@ class ConstFunc(Constant):
     return u"(함수)"
 
 
-class ConstBuiltin(Constant):
-  _immutable_fields_ = ['builtinval', 'type']
-
-  def __init__(self, value):
-    self.builtinval = value
-    self.type = TYPE_BUILTIN
-
-  def show(self):
-    return u"(미리 만들어진 값)"
-
-
-class ConstList(Constant):
-  _immutable_fields_ = ['listval', 'type']
-
-  def __init__(self, value):
-    self.listval = value
-    self.type = TYPE_LIST
-
-  def add(self, other):
-    if other.type == TYPE_LIST:
-      return ConstList(self.listval + other.listval)
-    else:
-      binary_typeerror(self.type, other.type, u"더하기")
-
-  def equal(self, other):
-    if other.type == TYPE_LIST:
-      return ConstBoolean(self.listval == other.listval)
-    else:
-      return ConstBoolean(False)
-
-  def show(self):
-    result = u"["
-
-    for item in self.listval:
-      result += item.show() + u", "
-
-    result += u"]"
-    return result
-
-
 class FuncObject:
-  _immutable_fields_ = ['arg_names', 'code', 'const_table']
+  _immutable_fields_ = ['code', 'const_table']
 
   def __init__(self, arg_names, code, const_table):
-    self.arg_names = arg_names
     self.code = code
     self.const_table = const_table
+    self.free_vars = []  # 실행 시점에 수정될 값이므로 immutable fields에 추가하지 않습니다.
 
 
 class BuiltinObject:
-  _immutable_fields_ = ['arity', 'func']
+  _immutable_fields_ = ['func']
 
   def __init__(self, arity, func):
-    self.arity = arity
     self.func = func
