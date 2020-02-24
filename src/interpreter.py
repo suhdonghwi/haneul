@@ -6,33 +6,34 @@ from constant import *
 from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa
 
 
-# jitdriver = JitDriver(greens=['pc', 'code'],
-#                       reds=['program'])]
+# jitdriver = JitDriver(greens=['pc', 'slot_start', 'const_table', 'code', 'free_vars', 'frame'],
+#                       reds=['stack', 'global_vars', 'self'])
 
 
 class CallFrame:
-  _immutable_fields_ = ['const_table', 'code', 'free_vars', 'slot_start']
+  # _immutable_fields_ = ['const_table',
+  #                       'code', 'free_vars[*]', 'slot_start']
 
   def __init__(self, const_table, code, free_vars, slot_start):
+    self.pc = 0
     self.const_table = const_table
     self.code = code
     self.free_vars = free_vars
     self.slot_start = slot_start
 
   # @elidable
-  def const(self, index):
+  def get_constant(self, index):
     return self.const_table[index]
 
 
 class Program:
-  _immutable_fields_ = ['global_vars', 'const_table', 'stack']
-
-  def __init__(self, global_var_names, global_vars):
+  def __init__(self, global_var_names, global_vars, frame):
     self.global_var_names = global_var_names
-    self.global_vars = global_vars + [None] * \
+    self.global_vars = global_vars + [None] *\
         (len(global_var_names) - len(global_vars))
 
     self.stack = []
+    self.call_stack = [frame]
 
   def push(self, v):
     self.stack.append(v)
@@ -43,17 +44,35 @@ class Program:
   def peek(self, n=0):
     return self.stack[len(self.stack) - n - 1]
 
-  def run(self, frame):
-    pc = 0
-    while pc < len(frame.code):
-      # jitdriver.jit_merge_point(pc=pc, code=frame.code, program=program)
+  def current_frame(self):
+    return self.call_stack[-1]
 
-      inst = frame.code[pc]
+  def run(self):
+    while True:
+      frame = self.current_frame()
+
+      if frame.pc >= len(frame.code):
+        if len(self.call_stack) == 1:
+          break
+
+        result = self.pop()
+        while len(self.stack) != frame.slot_start:
+          self.stack.pop()
+        self.push(result)
+
+        self.call_stack.pop()
+        continue
+
+      # jitdriver.jit_merge_point(
+      #     pc=pc, const_table=frame.const_table, code=frame.code, free_vars=frame.free_vars, slot_start=frame.slot_start, frame=frame,
+      #     stack=self.stack, global_vars=self.global_vars, self=self)
+
+      inst = frame.code[frame.pc]
       # inst = promote(inst)
       try:
         if inst.opcode == INST_PUSH:
           # print "PUSH"
-          self.push(frame.const_table[inst.operand_int])
+          self.push(frame.get_constant(inst.operand_int))
 
         elif inst.opcode == INST_POP:
           # print "POP"
@@ -110,15 +129,8 @@ class Program:
                 func_frame = CallFrame(func_object.const_table, func_object.code,
                                        func_object.free_vars, len(self.stack))
                 self.stack.extend(args)
+                self.call_stack.append(func_frame)
 
-                self.run(func_frame)
-
-                func_result = self.pop()
-
-                for _ in range(len(args)):
-                  self.pop()
-
-                self.push(func_result)
               else:
                 func_result = value.builtinval(args)
                 self.push(func_result)
@@ -132,7 +144,7 @@ class Program:
 
         elif inst.opcode == INST_JMP:
           # print "JMP"
-          pc = inst.operand_int
+          frame.pc = inst.operand_int
           # jitdriver.can_enter_jit(pc=pc, code=code, program=program)
           continue
 
@@ -143,7 +155,7 @@ class Program:
             raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
 
           if value.boolval == False:
-            pc = inst.operand_int
+            frame.pc = inst.operand_int
             continue
 
         elif inst.opcode == INST_FREE_VAR_LOCAL:
@@ -185,7 +197,7 @@ class Program:
             # print "GREATER_THAN"
             self.push(lhs.greater_than(rhs))
 
-        pc += 1
+        frame.pc += 1
       except HaneulError as e:
         if e.error_line == 0:
           e.error_line = inst.line_number
