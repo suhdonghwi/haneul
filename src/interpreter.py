@@ -7,7 +7,7 @@ from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, 
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'frame'],
-                          reds=['stack', 'call_stack', 'global_vars', 'global_var_names'])
+                          reds=['stack', 'call_stack', 'env'])
 
 
 @jit.unroll_safe
@@ -40,10 +40,28 @@ class CallFrame:
     return self.const_table[index]
 
 
+class Env:
+  _immutable_fields_ = ['var_names[*]']
+
+  def __init__(self, var_names, vars):
+    self.var_names = var_names
+    self.vars = vars + [None] * (len(var_names) - len(vars))
+
+  def store(self, value, index):
+    self.vars[index] = value
+
+  @jit.elidable
+  def lookup(self, index):
+    result = self.vars[index]
+    if result is None:
+      raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." %
+                            self.var_names[index])
+    else:
+      return result
+
+
 def run(global_var_names, global_vars, frame):
-  global_var_names = jit.promote(global_var_names)
-  global_vars = global_vars + [None] *\
-      (len(global_var_names) - len(global_vars))
+  env = Env(global_var_names, global_vars)
 
   stack = []
   call_stack = [frame]
@@ -65,7 +83,7 @@ def run(global_var_names, global_vars, frame):
       continue
 
     jitdriver.jit_merge_point(
-        pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
+        pc=frame.pc, env=env, frame=frame,
         stack=stack, call_stack=call_stack)
 
     inst = frame.code[frame.pc]
@@ -87,15 +105,10 @@ def run(global_var_names, global_vars, frame):
         stack.append(frame.free_vars[inst.operand_int])
 
       elif inst.opcode == INST_LOAD_GLOBAL:
-        result = global_vars[inst.operand_int]
-        if result is None:
-          raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." %
-                                global_var_names[inst.operand_int])
-        else:
-          stack.append(result)
+        stack.append(env.lookup(inst.operand_int))
 
       elif inst.opcode == INST_STORE_GLOBAL:
-        global_vars[inst.operand_int] = stack.pop()
+        env.store(stack.pop(), inst.operand_int)
 
       elif inst.opcode == INST_CALL:
         # print "CALL"
@@ -128,8 +141,7 @@ def run(global_var_names, global_vars, frame):
               call_stack.append(func_frame)
 
               jitdriver.can_enter_jit(
-                  pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
-                  stack=stack, call_stack=call_stack)
+                  pc=frame.pc, env=env, frame=frame, stack=stack, call_stack=call_stack)
             else:
               func_result = value.builtinval(args)
               stack.append(func_result)
