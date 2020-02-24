@@ -236,7 +236,10 @@ class ConstFunc(Constant):
   _immutable_fields_ = ['funcval', 'type']
 
   def __init__(self, josa_list, value):
-    self.josa_list = josa_list
+    self.josa_map = {}
+    for josa in josa_list:
+      self.josa_map[josa] = None
+
     self.funcval = value
     self.type = TYPE_FUNC
 
