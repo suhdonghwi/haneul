@@ -3,7 +3,7 @@
 
 from instruction import *
 from constant import *
-from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable
+from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa
 
 
 # jitdriver = JitDriver(greens=['pc', 'code'],
@@ -93,7 +93,7 @@ class Program:
                 if josa in value.josa_map:
                   value.josa_map[josa] = self.pop()
                 else:
-                  # TODO: JOSA NOT FOUND ERROR
+                  raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
                   return
 
             args = value.josa_map.values()
@@ -147,18 +147,10 @@ class Program:
             continue
 
         elif inst.opcode == INST_FREE_VAR_LOCAL:
-          if self.stack[-1].type != TYPE_FUNC:
-            # TODO: impossible
-            return
-
           value = self.stack[frame.slot_start + inst.operand_int]
           self.stack[-1].funcval.free_vars.append(value)
 
         elif inst.opcode == INST_FREE_VAR_FREE:
-          if self.stack[-1].type != TYPE_FUNC:
-            # TODO: impossible
-            return
-
           value = frame.free_vars[inst.operand_int]
           self.stack[-1].funcval.free_vars.append(value)
 
