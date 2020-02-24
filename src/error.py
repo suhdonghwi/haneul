@@ -17,13 +17,3 @@ class ArgNumberMismatch(HaneulError):
 class UnboundVariable(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
-
-
-class CannotReturn(HaneulError):
-  def __init__(self, message):
-    HaneulError.__init__(self, message)
-
-
-class NotCallable(HaneulError):
-  def __init__(self, message):
-    HaneulError.__init__(self, message)

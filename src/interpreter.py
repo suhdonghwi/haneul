@@ -3,7 +3,7 @@
 
 from instruction import *
 from constant import *
-from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, CannotReturn, NotCallable
+from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable
 
 
 # jitdriver = JitDriver(greens=['pc', 'code'],
@@ -124,7 +124,7 @@ class Program:
                 self.push(func_result)
 
           else:
-            raise NotCallable(
+            raise InvalidType(
                 u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(value.type))
 
           #   raise argnumbermismatch(
