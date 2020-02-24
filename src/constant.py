@@ -233,10 +233,10 @@ class ConstChar(Constant):
 
 
 class ConstFunc(Constant):
-  _immutable_fields_ = ['arity', 'funcval', 'type']
+  _immutable_fields_ = ['funcval', 'type']
 
-  def __init__(self, arity, value):
-    self.arity = arity
+  def __init__(self, josa_list, value):
+    self.josa_list = josa_list
     self.funcval = value
     self.type = TYPE_FUNC
 
@@ -247,7 +247,7 @@ class ConstFunc(Constant):
 class FuncObject:
   _immutable_fields_ = ['code', 'const_table']
 
-  def __init__(self, arg_names, code, const_table):
+  def __init__(self, code, const_table):
     self.code = code
     self.const_table = const_table
     self.free_vars = []  # 실행 시점에 수정될 값이므로 immutable fields에 추가하지 않습니다.
