@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from constant import ConstBuiltin, ConstNone,  BuiltinObject
+from constant import ConstNone, BuiltinObject
 
 
 def print_builtin_func(args):
@@ -7,5 +7,5 @@ def print_builtin_func(args):
   return ConstNone()
 
 
-print_builtin = ConstBuiltin(BuiltinObject(1, print_builtin_func))
+print_builtin = ConstNone
 default_globals = [(u'보여주다', print_builtin)]

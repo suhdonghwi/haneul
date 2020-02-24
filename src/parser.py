@@ -184,10 +184,10 @@ if __name__ == "__main__":
   # for name in global_var_names:
   #   print name.encode('utf-8')
 
-  for inst in code:
-    print instructions[inst.opcode]
+  # for inst in code:
+  #   print instructions[inst.opcode]
 
-  print "------------"
+  # print "------------"
 
   # def print_builtin_func(args):
   #   print args[0].show().encode('utf-8')

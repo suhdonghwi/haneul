@@ -12,4 +12,4 @@ class Instruction:
     self.line_number = line_number
     self.opcode = opcode
     self.operand_int = 0
-    self.operand_str = u''
+    self.operand_str = [u'']

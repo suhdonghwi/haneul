@@ -7,7 +7,7 @@ from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, 
 
 
 # jitdriver = JitDriver(greens=['pc', 'code'],
-#                       reds=['program'])
+#                       reds=['program'])]
 
 
 class CallFrame:
@@ -68,7 +68,7 @@ class Program:
 
         elif inst.opcode == INST_LOAD_GLOBAL:
           result = self.global_vars[inst.operand_int]
-          if result == None:
+          if result is None:
             raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." %
                                   self.global_var_names[inst.operand_int])
           else:
@@ -84,9 +84,9 @@ class Program:
           value = self.pop()
           if value.type == TYPE_FUNC:
             for (i, josa) in enumerate(inst.operand_str):
-              if josa == "_":
+              if josa == u"_":
                 for (k, v) in value.josa_map.iteritems():
-                  if v == None:
+                  if v is None:
                     value.josa_map[k] = self.pop()
                     break
               else:
@@ -94,12 +94,12 @@ class Program:
                   value.josa_map[josa] = self.pop()
                 else:
                   # TODO: JOSA NOT FOUND ERROR
-                  exit(-1)
+                  return
 
             args = value.josa_map.values()
             rest_arity = 0
             for v in args:
-              if v == None:
+              if v is None:
                 rest_arity += 1
 
             if rest_arity > 0:
@@ -142,24 +142,24 @@ class Program:
             continue
 
         elif inst.opcode == INST_FREE_VAR_LOCAL:
-          if self.stack[-1] != TYPE_FUNC:
+          if self.stack[-1].type != TYPE_FUNC:
             # TODO: impossible
-            exit(-1)
+            return
 
           value = self.stack[frame.slot_start + inst.operand_int]
-          self.stack[-1].funcval.free_vars.push(value)
+          self.stack[-1].funcval.free_vars.append(value)
 
         elif inst.opcode == INST_FREE_VAR_FREE:
-          if self.stack[-1] != TYPE_FUNC:
+          if self.stack[-1].type != TYPE_FUNC:
             # TODO: impossible
-            exit(-1)
+            return
 
           value = frame.free_vars[inst.operand_int]
-          self.stack[-1].funcval.free_vars.push(value)
+          self.stack[-1].funcval.free_vars.append(value)
 
         elif inst.opcode == INST_NEGATE:
           # print "NEGATE"
-          value = program.pop()
+          value = self.pop()
           self.push(value.negate())
         else:
           rhs, lhs = self.pop(), self.pop()

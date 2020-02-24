@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 
-from interpreter import Program, run_code
+from interpreter import CallFrame, Program
 from parser import BytecodeParser
 from error import HaneulError
+from constant import ConstInteger
 
 from environment import default_globals
 
@@ -25,11 +26,12 @@ def entry_point(argv):
   os.close(fp)
 
   parser = BytecodeParser(content)
-  (const_table, code) = parser.parse_code()
+  (global_var_names, const_table, code) = parser.parse_code()
 
-  program = Program(const_table, default_globals)
+  frame = CallFrame(const_table, code, [], 0)
+  program = Program(global_var_names, [ConstInteger(1)])
   try:
-    run_code(program, code)
+    program.run(frame)
   except HaneulError as e:
     print (u"%d번째 라인에서 에러 발생 : %s" % (e.error_line, e.message)).encode('utf-8')
 
