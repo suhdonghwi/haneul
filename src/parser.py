@@ -11,13 +11,6 @@ from constant import *
 from interpreter import *
 
 
-def bytes_to_int(data, length):
-  result = 0
-  for i in range(length):
-    result = result * 256 + data[i]
-  return result
-
-
 class BytecodeParser:
   def __init__(self, code):
     self.code = str(code)
