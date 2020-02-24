@@ -10,7 +10,7 @@ jitdriver = jit.JitDriver(greens=['pc', 'frame'],
                           reds=['stack', 'call_stack', 'global_vars', 'global_var_names'])
 
 
-@jit.elidable
+@jit.unroll_safe
 def resolve_josa(josa, josa_map):
   if josa == u"_":
     for (j, (k, v)) in enumerate(josa_map):
@@ -28,12 +28,12 @@ class CallFrame:
   # _immutable_fields_ = ['const_table[*]'
   #                       'code[*]', 'free_vars[*]', 'slot_start']
 
-  def __init__(self, table, insts, free_list, slot_index):
+  def __init__(self, const_table, code, free_vars, slot_start):
     self.pc = 0
-    self.const_table = table
-    self.code = insts
-    self.free_vars = free_list
-    self.slot_start = slot_index
+    self.const_table = const_table
+    self.code = code
+    self.free_vars = free_vars
+    self.slot_start = slot_start
 
   @jit.elidable
   def get_constant(self, index):
