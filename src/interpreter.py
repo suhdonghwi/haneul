@@ -10,9 +10,23 @@ jitdriver = jit.JitDriver(greens=['pc', 'frame'],
                           reds=['stack', 'call_stack', 'global_vars', 'global_var_names'])
 
 
+@jit.elidable
+def resolve_josa(josa, josa_map):
+  if josa == u"_":
+    for (j, (k, v)) in enumerate(josa_map):
+      if v is None:
+        return (k, j)
+    raise InvalidType(u"이 함수에는 더 이상 값을 적용할 수 없습니다.")
+  else:
+    for (j, (k, v)) in enumerate(josa_map):
+      if josa == k:
+        return (josa, j)
+    raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
+
+
 class CallFrame:
-  # _immutable_fields_ = [
-  #     'code[*]', 'free_vars[*]', 'slot_start']
+  # _immutable_fields_ = ['const_table[*]'
+  #                       'code[*]', 'free_vars[*]', 'slot_start']
 
   def __init__(self, table, insts, free_list, slot_index):
     self.pc = 0
@@ -91,28 +105,8 @@ def run(global_var_names, global_vars, frame):
         josa_map = list(value.josa_map)
         if value.type == TYPE_FUNC:
           for josa in inst.operand_str:
-            if josa == u"_":
-              found = False
-              for (j, (k, v)) in enumerate(josa_map):
-                if v is None:
-                  josa_map[j] = (k, stack.pop())
-                  found = True
-                  break
-
-              if not found:
-                raise InvalidType(u"이 함수에는 더 이상 값을 적용할 수 없습니다.")
-                return
-            else:
-              found = False
-              for (j, (k, v)) in enumerate(josa_map):
-                if josa == k:
-                  josa_map[j] = (josa, stack.pop())
-                  found = True
-                  break
-
-              if not found:
-                raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
-                return
+            (j, index) = resolve_josa(josa, josa_map)
+            josa_map[index] = (j, stack.pop())
 
           args = []
           rest_arity = 0
@@ -133,9 +127,9 @@ def run(global_var_names, global_vars, frame):
               stack.extend(args)
               call_stack.append(func_frame)
 
-              # jitdriver.can_enter_jit(
-              #     pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
-              #     stack=stack, call_stack=call_stack)
+              jitdriver.can_enter_jit(
+                  pc=frame.pc, global_vars=global_vars, global_var_names=global_var_names, frame=frame,
+                  stack=stack, call_stack=call_stack)
             else:
               func_result = value.builtinval(args)
               stack.append(func_result)
@@ -143,9 +137,6 @@ def run(global_var_names, global_vars, frame):
         else:
           raise InvalidType(
               u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(value.type))
-
-        #   raise argnumbermismatch(
-        #       u"이 함수 %d개의 인수를 받지만 %d개의 인수가 주어졌습니다." % (func_object.arity, inst.operand_int))
 
       elif inst.opcode == INST_JMP:
         # print "JMP"
@@ -206,20 +197,3 @@ def run(global_var_names, global_vars, frame):
       if e.error_line == 0:
         e.error_line = inst.line_number
       raise e
-
-  """
-    # print "[",
-    for c in self.stack:
-      if c.type == TYPE_INTEGER:
-        # print c.intval,
-      if c.type == TYPE_REAL:
-        # print c.doubleval,
-      if c.type == TYPE_STRING:
-        # print c.stringval,
-      if c.type == TYPE_BOOLEAN:
-        # print c.boolval,
-      if c.type == TYPE_FUNC:
-        # print c.funcval,
-        # print ", ",
-        # print "]"
-    """
