@@ -169,7 +169,11 @@ class BytecodeParser:
     const_table = self.parse_constant_list()
     insts = self.parse_instruction_list()
 
-    return ConstFunc(josa_list, FuncObject(insts, const_table))
+    josa_map = []
+    for josa in josa_list:
+      josa_map.append((josa, None))
+
+    return ConstFunc(josa_map, FuncObject(insts, const_table))
 
   def parse_code(self):
     global_var_names = self.parse_string_list()

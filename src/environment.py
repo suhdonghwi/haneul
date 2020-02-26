@@ -7,5 +7,5 @@ def print_builtin_func(args):
   return ConstNone()
 
 
-print_builtin = ConstFunc([u"을"], None, print_builtin_func)
+print_builtin = ConstFunc([(u"을", None)], None, print_builtin_func)
 default_globals = [print_builtin]

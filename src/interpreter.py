@@ -5,6 +5,8 @@ from instruction import *
 from constant import *
 from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa
 
+import copy
+
 
 def get_location(pc, code_object):
   """Add debug information.
@@ -162,11 +164,15 @@ class Interpreter:
 
         elif op == INST_FREE_VAR_LOCAL:
           value = stack[inst.operand_int]
-          stack[-1].funcval.free_vars.append(value)
+          func = stack.pop().copy()
+          func.funcval.free_vars.append(value)
+          stack.append(func)
 
         elif op == INST_FREE_VAR_FREE:
           value = code_object.free_vars[inst.operand_int]
-          stack[-1].funcval.free_vars.append(value)
+          func = stack.pop().copy()
+          func.funcval.free_vars.append(value)
+          stack.append(func)
 
         elif op == INST_NEGATE:
           # print "NEGATE"
@@ -208,7 +214,7 @@ class Interpreter:
     if len(stack) == 0:
       return None
     else:
-      jitdriver.can_enter_jit(
-          pc=pc, code_object=code_object,
-          stack=stack, self=self)
+      # jitdriver.can_enter_jit(
+      #     pc=pc, code_object=code_object,
+      #     stack=stack, self=self)
       return stack.pop()

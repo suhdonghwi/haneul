@@ -235,11 +235,8 @@ class ConstChar(Constant):
 class ConstFunc(Constant):
   _immutable_fields_ = ['funcval', 'type']
 
-  def __init__(self, josa_list, value, builtin_func=None):
-    self.josa_map = []
-    for josa in josa_list:
-      self.josa_map.append((josa, None))
-
+  def __init__(self, josa_map, value, builtin_func=None):
+    self.josa_map = josa_map
     self.funcval = value
     self.builtinval = builtin_func
     self.type = TYPE_FUNC
@@ -247,14 +244,22 @@ class ConstFunc(Constant):
   def show(self):
     return u"(함수)"
 
+  def copy(self):
+    func = ConstFunc([], self.funcval.copy(), self.builtinval)
+    func.josa_map = self.josa_map
+    return func
+
 
 class FuncObject:
   _immutable_fields_ = ['code', 'const_table']
 
-  def __init__(self, code, const_table):
+  def __init__(self, code, const_table, free_vars=[]):
     self.code = code
     self.const_table = const_table
-    self.free_vars = []  # 실행 시점에 수정될 값이므로 immutable fields에 추가하지 않습니다.
+    self.free_vars = free_vars  # 실행 시점에 수정될 값이므로 immutable fields에 추가하지 않습니다.
+
+  def copy(self):
+    return FuncObject(self.code, self.const_table, list(self.free_vars))
 
 
 class BuiltinObject:
