@@ -64,6 +64,7 @@ class Interpreter:
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
+      print pc
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
           stack=stack, self=self)
@@ -84,6 +85,7 @@ class Interpreter:
           stack.append(stack[inst.operand_int])
 
         elif op == INST_LOAD_DEREF:
+          # print "DEBUG " + str(inst.line_number) + ":" + str(inst.operand_int)
           stack.append(code_object.free_vars[inst.operand_int])
 
         elif op == INST_LOAD_GLOBAL:
@@ -120,11 +122,7 @@ class Interpreter:
               stack.append(func)
             else:  # rest_arity == 0
               if value.builtinval is None:
-                func_object = value.funcval
-                func_code_object = CodeObject(func_object.const_table, func_object.code,
-                                              func_object.free_vars)
-
-                result = self.run(func_code_object, args)
+                result = self.run(value.funcval, args)
                 stack.append(result)
               else:
                 func_result = value.builtinval(args)
