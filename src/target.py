@@ -28,9 +28,8 @@ def entry_point(argv):
   parser = BytecodeParser(content)
   (global_var_names, const_table, code) = parser.parse_code()
 
-  code_object = CodeObject(const_table, code, [])
+  code_object = CodeObject(const_table, code)
   interpreter = Interpreter(Env(global_var_names, default_globals))
-  # program = Program(global_var_names, default_globals, frame)
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:

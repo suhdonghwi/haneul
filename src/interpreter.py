@@ -34,19 +34,6 @@ def resolve_josa(josa, josa_map):
     raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
 
 
-class CodeObject:
-  _immutable_fields_ = ['const_table', 'code', 'free_vars']
-
-  def __init__(self, const_table, code, free_vars):
-    self.const_table = const_table
-    self.code = code
-    self.free_vars = free_vars
-
-  @jit.elidable
-  def get_constant(self, index):
-    return self.const_table[index]
-
-
 class Env:
   _immutable_fields_ = ['var_names[*]']
 

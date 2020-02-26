@@ -250,16 +250,20 @@ class ConstFunc(Constant):
     return func
 
 
-class FuncObject:
-  _immutable_fields_ = ['code', 'const_table']
+class CodeObject:
+  _immutable_fields_ = ['const_table', 'code', 'free_vars']
 
-  def __init__(self, code, const_table, free_vars=[]):
-    self.code = code
+  def __init__(self, const_table, code, free_vars=[]):
     self.const_table = const_table
-    self.free_vars = free_vars  # 실행 시점에 수정될 값이므로 immutable fields에 추가하지 않습니다.
+    self.code = code
+    self.free_vars = free_vars
+
+  @jit.elidable
+  def get_constant(self, index):
+    return self.const_table[index]
 
   def copy(self):
-    return FuncObject(self.code, self.const_table, list(self.free_vars))
+    return CodeObject(self.const_table, self.code, list(self.free_vars))
 
 
 class BuiltinObject:
