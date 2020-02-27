@@ -13,7 +13,7 @@ def get_location(pc, code_object):
   PYPYLOG=jit-log-opt,jit-backend,jit-summary:<filename>
   """
   inst = code_object.code[pc]
-  return "#%d_%s_%d" % (pc, instructions[inst.opcode], inst.operand_int)
+  return "#%d_%s_%d" % (pc, INSTRUCTION_NAMES[inst.opcode], inst.operand_int)
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
@@ -64,7 +64,7 @@ class Interpreter:
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
-      print pc
+      # print pc
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
           stack=stack, self=self)
