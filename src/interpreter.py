@@ -17,7 +17,7 @@ def get_location(pc, code_object):
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['stack', 'self'], get_printable_location=get_location)
+                          reds=['stack', 'frame', 'self'], get_printable_location=get_location)
 
 
 @jit.unroll_safe
@@ -57,36 +57,21 @@ class Env:
       return result
 
 
-class Cell:
-  """
-  지역 변수에 대한 참조를 유지하기 위해서 담아두는 컨테이너입니다.
-  """
-  _immutable_fields_ = ['content']
-
-  def __init__(self, content=None):
-    self.content = content
-
-
 class Frame:
   """
   지역 변수들을 담아두는 스택 프레임입니다.
   """
   _immutable_fields_ = ['locals']
 
-  def __init__(self, values, size):
-    self.locals = []
-    for value in values:
-      self.locals.append(Cell(value))
-
-    for _ in range(size - len(values)):
-      self.locals.append(Cell())
+  def __init__(self, values):
+    self.locals = values
 
   @jit.elidable
   def load(self, index):
-    return self.locals[index].value
+    return self.locals[index]
 
-  def store(self, index, value):
-    self.locals[index].value = value
+  def store(self, value):
+    self.locals.append(value)
 
 
 class Interpreter:
@@ -96,14 +81,14 @@ class Interpreter:
   def run(self, code_object, args):
     pc = 0
     stack = []
-    frame = Frame(args, 5)
+    frame = Frame(args)
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
       # print pc
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
-          stack=stack, self=self)
+          stack=stack, frame=frame, self=self)
 
       inst = jit.promote(code_object.code[pc])
       op = jit.promote(inst.opcode)
@@ -118,10 +103,10 @@ class Interpreter:
           stack.append(frame.load(inst.operand_int))
 
         elif op == INST_STORE:
-          frame.store(inst.operand_int, stack.pop())
+          frame.store(stack.pop())
 
         elif op == INST_LOAD_DEREF:
-          stack.append(code_object.free_vars[inst.operand_int].value)
+          stack.append(code_object.free_vars[inst.operand_int])
 
         elif op == INST_LOAD_GLOBAL:
           stack.append(self.env.lookup(inst.operand_int))
