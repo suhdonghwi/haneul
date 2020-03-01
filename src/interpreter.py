@@ -13,11 +13,11 @@ def get_location(pc, code_object):
   PYPYLOG=jit-log-opt,jit-backend,jit-summary:<filename>
   """
   inst = code_object.code[pc]
-  return "#%d_%s_%d" % (pc, INSTRUCTION_NAMES[inst.opcode], inst.operand_int)
+  return "#%d_%s_%d" % (pc, instructions[inst.opcode], inst.operand_int)
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['stack', 'frame', 'self'], get_printable_location=get_location)
+                          reds=['stack', 'self'], get_printable_location=get_location)
 
 
 @jit.unroll_safe
@@ -35,9 +35,6 @@ def resolve_josa(josa, josa_map):
 
 
 class Env:
-  """
-  전역인 값들을 담아두는 Environment 입니다.
-  """
   _immutable_fields_ = ['var_names[*]']
 
   def __init__(self, var_names, vars):
@@ -57,55 +54,38 @@ class Env:
       return result
 
 
-class Frame:
-  """
-  지역 변수들을 담아두는 스택 프레임입니다.
-  """
-  _immutable_fields_ = ['locals']
-
-  def __init__(self, values):
-    self.locals = values
-
-  @jit.elidable
-  def load(self, index):
-    return self.locals[index]
-
-  def store(self, value):
-    self.locals.append(value)
-
-
 class Interpreter:
   def __init__(self, env):
     self.env = env
 
   def run(self, code_object, args):
     pc = 0
-    stack = []
-    frame = Frame(args)
+    stack = args
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
-      # print pc
+      print pc
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
-          stack=stack, frame=frame, self=self)
+          stack=stack, self=self)
 
       inst = jit.promote(code_object.code[pc])
       op = jit.promote(inst.opcode)
       try:
         if op == INST_PUSH:
+          # print "PUSH"
           stack.append(code_object.get_constant(inst.operand_int))
 
         elif op == INST_POP:
+          # print "POP"
           stack.pop()
 
         elif op == INST_LOAD:
-          stack.append(frame.load(inst.operand_int))
-
-        elif op == INST_STORE:
-          frame.store(stack.pop())
+          # print "LOAD"
+          stack.append(stack[inst.operand_int])
 
         elif op == INST_LOAD_DEREF:
+          # print "DEBUG " + str(inst.line_number) + ":" + str(inst.operand_int)
           stack.append(code_object.free_vars[inst.operand_int])
 
         elif op == INST_LOAD_GLOBAL:
@@ -115,6 +95,7 @@ class Interpreter:
           self.env.store(stack.pop(), inst.operand_int)
 
         elif op == INST_CALL:
+          # print "CALL"
           given_arity = len(inst.operand_str)
 
           value = stack.pop()
@@ -152,10 +133,12 @@ class Interpreter:
                 u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(value.type))
 
         elif op == INST_JMP:
+          # print "JMP"
           pc = inst.operand_int
           continue
 
         elif op == INST_POP_JMP_IF_FALSE:
+          # print "POPJMPIFFALSE"
           value = stack.pop()
           if value.type != TYPE_BOOLEAN:
             raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
@@ -165,7 +148,7 @@ class Interpreter:
             continue
 
         elif op == INST_FREE_VAR_LOCAL:
-          value = frame.locals[inst.operand_int]
+          value = stack[inst.operand_int]
           func = stack.pop().copy()
           func.funcval.free_vars.append(value)
           stack.append(func)
@@ -177,25 +160,34 @@ class Interpreter:
           stack.append(func)
 
         elif op == INST_NEGATE:
+          # print "NEGATE"
           value = stack.pop()
           stack.append(value.negate())
         else:
           rhs, lhs = stack.pop(), stack.pop()
           if op == INST_ADD:
+            # print "ADD"
             stack.append(lhs.add(rhs))
           elif op == INST_SUBTRACT:
+            # print "SUBTRACT"
             stack.append(lhs.subtract(rhs))
           elif op == INST_MULTIPLY:
+            # print "MULTIPLY"
             stack.append(lhs.multiply(rhs))
           elif op == INST_DIVIDE:
+            # print "DIVIDE"
             stack.append(lhs.divide(rhs))
           elif op == INST_MOD:
+            # print "MOD"
             stack.append(lhs.mod(rhs))
           elif op == INST_EQUAL:
+            # print "EQUAL"
             stack.append(lhs.equal(rhs))
           elif op == INST_LESS_THAN:
+            # print "LESS_THAN"
             stack.append(lhs.less_than(rhs))
           elif op == INST_GREATER_THAN:
+            # print "GREATER_THAN"
             stack.append(lhs.greater_than(rhs))
 
         pc += 1
