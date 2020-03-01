@@ -64,7 +64,7 @@ class Interpreter:
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
-      print pc
+      # print pc
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
           stack=stack, self=self)
