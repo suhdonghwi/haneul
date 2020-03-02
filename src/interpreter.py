@@ -9,8 +9,8 @@ import copy
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['stack', 'frame', 'self'],
-                          virtualizables=['frame'])
+                          reds=['stack', 'frame', 'self']
+                          )
 
 
 @jit.unroll_safe
@@ -56,7 +56,6 @@ class Env:
 
 class Frame:
   _immutable_fields_ = ['locals']
-  _virtualizable_ = ['locals[*]']
 
   def __init__(self, local_number, locals):
     self.locals = locals
