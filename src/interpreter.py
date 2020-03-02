@@ -65,8 +65,23 @@ class Frame:
   def load(self, index):
     return self.locals[index]
 
+  def load_reserve(self, index):
+    value = self.locals[index]
+    if value is None:
+      self.locals[index] = ConstNone()
+      return self.locals[index]
+    else:
+      return value
+
   def store(self, value, index):
-    self.locals[index] = value
+    dest = self.locals[index]
+    if dest.type == TYPE_NONE:
+      dest.type = TYPE_FUNC
+      dest.funcval = value.funcval
+      dest.builtinval = value.builtinval
+      dest.josa_map = value.josa_map
+    else:
+      self.locals[index] = value
     # self.locals.append(value)
 
 
@@ -111,7 +126,6 @@ class Interpreter:
           self.env.store(stack.pop(), inst.operand_int)
 
         elif op == INST_CALL:
-          # print "CALL"
           given_arity = len(inst.operand_str)
 
           value = stack.pop()
@@ -162,7 +176,7 @@ class Interpreter:
             continue
 
         elif op == INST_FREE_VAR_LOCAL:
-          value = frame.load(inst.operand_int)
+          value = frame.load_reserve(inst.operand_int)
           func = stack.pop().copy()
           func.funcval.free_vars.append(value)
           stack.append(func)
