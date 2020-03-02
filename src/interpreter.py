@@ -37,8 +37,8 @@ class Env:
   def __init__(self, var_names, vars):
     self.var_names = var_names
 
+    resize_list(vars, len(var_names))
     self.vars = vars
-    resize_list(self.vars, len(var_names))
     # self.vars = vars + [None] * (len(var_names) - len(vars))
 
   def store(self, value, index):
@@ -58,10 +58,10 @@ class Frame:
   _immutable_fields_ = ['locals']
 
   def __init__(self, local_number, locals):
+    resize_list(locals, local_number)
     self.locals = locals
-    resize_list(self.locals, local_number)
 
-  # @jit.elidable
+  @jit.elidable
   def load(self, index):
     return self.locals[index]
 
@@ -220,5 +220,5 @@ class Interpreter:
     else:
       # jitdriver.can_enter_jit(
       #     pc=pc, code_object=code_object,
-      #     stack=stack, self=self)
+      #     stack=stack, frame=frame, self=self)
       return stack.pop()

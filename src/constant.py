@@ -6,8 +6,8 @@ from constant_type import *
 
 
 class Constant:
-  _immutable_fields_ = ['intval', 'doubleval', 'boolval',
-                        'charval', 'funcval', 'type']
+  _attrs_ = _immutable_fields_ = [
+      'intval', 'doubleval', 'boolval', 'charval', 'funcval', 'builtinval', 'josa_map', 'type']
 
   def add(self, other):
     binary_typeerror(self.type, other.type, u"더하기")
@@ -41,7 +41,7 @@ class Constant:
 
 
 class ConstNone(Constant):
-  _immutable_fields_ = ['type']
+  _attrs_ = _immutable_fields_ = ['type']
 
   def __init__(self):
     self.type = TYPE_NONE
@@ -57,7 +57,7 @@ class ConstNone(Constant):
 
 
 class ConstInteger(Constant):
-  _immutable_fields_ = ['intval', 'type']
+  _attrs_ = _immutable_fields_ = ['intval', 'type']
 
   def __init__(self, value):
     self.intval = value
@@ -131,7 +131,7 @@ class ConstInteger(Constant):
 
 
 class ConstDouble(Constant):
-  _immutable_fields_ = ['doubleval', 'type']
+  _attrs_ = _immutable_fields_ = ['doubleval', 'type']
 
   def __init__(self, value):
     self.doubleval = value
@@ -196,7 +196,7 @@ class ConstDouble(Constant):
 
 
 class ConstBoolean(Constant):
-  _immutable_fields_ = ['boolval', 'type']
+  _attrs_ = _immutable_fields_ = ['boolval', 'type']
 
   def __init__(self, value):
     self.boolval = value
@@ -216,7 +216,7 @@ class ConstBoolean(Constant):
 
 
 class ConstChar(Constant):
-  _immutable_fields_ = ['charval', 'type']
+  _attrs_ = _immutable_fields_ = ['charval', 'type']
 
   def __init__(self, value):
     self.charval = value
@@ -233,7 +233,7 @@ class ConstChar(Constant):
 
 
 class ConstFunc(Constant):
-  _immutable_fields_ = ['funcval', 'type']
+  _attrs_ = _immutable_fields_ = ['funcval', 'builtinval', 'josa_map', 'type']
 
   def __init__(self, josa_map, value, builtin_func=None):
     self.josa_map = josa_map
@@ -245,13 +245,13 @@ class ConstFunc(Constant):
     return u"(함수)"
 
   def copy(self):
-    func = ConstFunc([], self.funcval.copy(), self.builtinval)
-    func.josa_map = self.josa_map
+    func = ConstFunc(self.josa_map, self.funcval.copy(), self.builtinval)
     return func
 
 
 class CodeObject:
-  _immutable_fields_ = ['const_table', 'code', 'local_number', 'free_vars']
+  _attrs_ = _immutable_fields_ = [
+      'const_table', 'code', 'local_number', 'free_vars']
 
   def __init__(self, const_table, code, local_number, free_vars=[]):
     self.const_table = const_table
@@ -268,7 +268,7 @@ class CodeObject:
 
 
 class BuiltinObject:
-  _immutable_fields_ = ['func']
+  _attrs_ = _immutable_fields_ = ['func']
 
   def __init__(self, arity, func):
     self.func = func
