@@ -9,7 +9,8 @@ import copy
 
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['stack', 'frame', 'self']
+                          reds=['stack', 'frame', 'self'],
+                          virtualizables=['frame']
                           )
 
 
@@ -56,32 +57,41 @@ class Env:
 
 class Frame:
   _immutable_fields_ = ['locals']
+  _virtualizable_ = ['locals[*]']
 
-  def __init__(self, local_number, locals):
-    resize_list(locals, local_number)
-    self.locals = locals
+  def __init__(self, local_number, local_list):
+    self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
+
+    resize_list(local_list, local_number)
+    self.local_list = local_list
 
   @jit.elidable
   def load(self, index):
-    return self.locals[index]
+    assert(index >= 0)
+
+    return self.local_list[index]
 
   def load_reserve(self, index):
-    value = self.locals[index]
+    assert(index >= 0)
+
+    value = self.local_list[index]
     if value is None:
-      self.locals[index] = ConstNone()
-      return self.locals[index]
+      self.local_list[index] = ConstNone()
+      return self.local_list[index]
     else:
       return value
 
   def store(self, value, index):
-    dest = self.locals[index]
+    assert(index >= 0)
+
+    dest = self.local_list[index]
     if dest.type == TYPE_NONE:
       dest.type = TYPE_FUNC
       dest.funcval = value.funcval
       dest.builtinval = value.builtinval
       dest.josa_map = value.josa_map
     else:
-      self.locals[index] = value
+      self.local_list[index] = value
     # self.locals.append(value)
 
 
@@ -218,7 +228,4 @@ class Interpreter:
     if len(stack) == 0:
       return None
     else:
-      # jitdriver.can_enter_jit(
-      #     pc=pc, code_object=code_object,
-      #     stack=stack, frame=frame, self=self)
       return stack.pop()
