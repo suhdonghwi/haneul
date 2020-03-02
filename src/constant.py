@@ -251,11 +251,12 @@ class ConstFunc(Constant):
 
 
 class CodeObject:
-  _immutable_fields_ = ['const_table', 'code', 'free_vars']
+  _immutable_fields_ = ['const_table', 'code', 'local_number', 'free_vars']
 
-  def __init__(self, const_table, code, free_vars=[]):
+  def __init__(self, const_table, code, local_number, free_vars=[]):
     self.const_table = const_table
     self.code = code
+    self.local_number = local_number
     self.free_vars = free_vars
 
   @jit.elidable
@@ -263,7 +264,7 @@ class CodeObject:
     return self.const_table[index]
 
   def copy(self):
-    return CodeObject(self.const_table, self.code, list(self.free_vars))
+    return CodeObject(self.const_table, self.code, self.local_number, list(self.free_vars))
 
 
 class BuiltinObject:

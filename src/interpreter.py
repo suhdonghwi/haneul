@@ -8,16 +8,9 @@ from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, 
 import copy
 
 
-def get_location(pc, code_object):
-  """Add debug information.
-  PYPYLOG=jit-log-opt,jit-backend,jit-summary:<filename>
-  """
-  inst = code_object.code[pc]
-  return "#%d_%s_%d" % (pc, instructions[inst.opcode], inst.operand_int)
-
-
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['stack', 'self'], get_printable_location=get_location)
+                          reds=['stack', 'frame', 'self'],
+                          virtualizables=['frame'])
 
 
 @jit.unroll_safe
@@ -34,12 +27,19 @@ def resolve_josa(josa, josa_map):
     raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
 
 
+def resize_list(l, size, value=None):
+  l.extend([value] * (size - len(l)))
+
+
 class Env:
   _immutable_fields_ = ['var_names[*]']
 
   def __init__(self, var_names, vars):
     self.var_names = var_names
-    self.vars = vars + [None] * (len(var_names) - len(vars))
+
+    self.vars = vars
+    resize_list(self.vars, len(var_names))
+    # self.vars = vars + [None] * (len(var_names) - len(vars))
 
   def store(self, value, index):
     self.vars[index] = value
@@ -56,9 +56,11 @@ class Env:
 
 class Frame:
   _immutable_fields_ = ['locals']
+  _virtualizable_ = ['locals[*]']
 
-  def __init__(self, locals):
+  def __init__(self, local_number, locals):
     self.locals = locals
+    resize_list(self.locals, local_number)
 
   @jit.elidable
   def load(self, index):
@@ -75,13 +77,13 @@ class Interpreter:
   def run(self, code_object, args):
     pc = 0
     stack = []
-    frame = Frame(args)
+    frame = Frame(code_object.local_number, args)
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):
       jitdriver.jit_merge_point(
           pc=pc, code_object=code_object,
-          stack=stack, self=self)
+          stack=stack, frame=frame, self=self)
 
       inst = jit.promote(code_object.code[pc])
       op = jit.promote(inst.opcode)

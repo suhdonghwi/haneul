@@ -168,12 +168,13 @@ class BytecodeParser:
     josa_list = self.parse_josa_list()
     const_table = self.parse_constant_list()
     insts = self.parse_instruction_list()
+    local_number = self.consume_uint()
 
     josa_map = []
     for josa in josa_list:
       josa_map.append((josa, None))
 
-    return ConstFunc(josa_map, CodeObject(const_table, insts))
+    return ConstFunc(josa_map, CodeObject(const_table, insts, local_number))
 
   def parse_code(self):
     global_var_names = self.parse_string_list()
@@ -202,7 +203,7 @@ if __name__ == "__main__":
   parser = BytecodeParser(content)
   (global_var_names, const_table, code) = parser.parse_code()
 
-  code_object = CodeObject(const_table, code)
+  code_object = CodeObject(const_table, code, 0)
   interpreter = Interpreter(Env(global_var_names, default_globals))
   # program = Program(global_var_names, default_globals, frame)
   try:
