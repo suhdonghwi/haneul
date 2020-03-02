@@ -62,8 +62,8 @@ class Frame:
   def __init__(self, local_number, local_list, max_stack_depth=8):
     self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
 
-    resize_list(local_list, local_number)
-    self.local_list = local_list
+    # resize_list(local_list, local_number)
+    self.local_list = local_list + [None] * (local_number - len(local_list))
 
     self.stack = [None] * max_stack_depth
     self.stack_top = 0
