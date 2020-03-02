@@ -62,12 +62,13 @@ class Frame:
     self.locals = locals
     resize_list(self.locals, local_number)
 
-  @jit.elidable
+  # @jit.elidable
   def load(self, index):
     return self.locals[index]
 
-  def store(self, value):
-    self.locals.append(value)
+  def store(self, value, index):
+    self.locals[index] = value
+    # self.locals.append(value)
 
 
 class Interpreter:
@@ -99,7 +100,7 @@ class Interpreter:
 
         elif op == INST_STORE:
           # frame.append(stack.pop())
-          frame.store(stack.pop())
+          frame.store(stack.pop(), inst.operand_int)
 
         elif op == INST_LOAD_DEREF:
           stack.append(code_object.free_vars[inst.operand_int])
@@ -162,7 +163,7 @@ class Interpreter:
             continue
 
         elif op == INST_FREE_VAR_LOCAL:
-          value = stack[inst.operand_int]
+          value = frame.load(inst.operand_int)
           func = stack.pop().copy()
           func.funcval.free_vars.append(value)
           stack.append(func)
