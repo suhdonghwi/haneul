@@ -58,7 +58,7 @@ class Interpreter:
 
   def run(self, code_object, args):
     pc = 0
-    frame = Frame(code_object.local_number, args)
+    frame = Frame(code_object.local_number, args, code_object.stack_size)
     code_object = jit.promote(code_object)
 
     while pc < len(code_object.code):

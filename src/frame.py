@@ -9,12 +9,12 @@ class Frame:
   _immutable_fields_ = ['locals', 'stack']
   _virtualizable_ = ['local_list[*]', 'stack[*]', 'stack_top']
 
-  def __init__(self, local_number, local_list, max_stack_depth=8):
+  def __init__(self, local_number, local_list, max_stack_size):
     self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
 
     self.local_list = local_list + [None] * (local_number - len(local_list))
 
-    self.stack = [None] * max_stack_depth
+    self.stack = [None] * max_stack_size
     self.stack_top = 0
 
   def push(self, value):

@@ -26,9 +26,9 @@ def entry_point(argv):
   os.close(fp)
 
   parser = BytecodeParser(content)
-  (global_var_names, const_table, code) = parser.parse_code()
+  (global_var_names, stack_size, const_table, code) = parser.parse_program()
 
-  code_object = CodeObject(const_table, code, 0)
+  code_object = CodeObject(const_table, code, 0, stack_size)
   interpreter = Interpreter(Env(global_var_names, default_globals))
   try:
     interpreter.run(code_object, [])
