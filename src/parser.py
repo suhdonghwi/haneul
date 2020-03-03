@@ -13,6 +13,10 @@ from environment import default_globals
 from rpython.rlib.rarithmetic import intmask
 from rpython.rlib.rstruct.runpack import runpack
 
+TYPE_NAMES = ['NONE', 'INTEGER', 'REAL', 'CHAR', 'BOOLEAN', 'FUNC']
+for (i, typename) in enumerate(TYPE_NAMES):
+  globals()['TYPE_' + typename] = i
+
 
 class BytecodeParser:
   def __init__(self, code):
@@ -62,7 +66,7 @@ class BytecodeParser:
 
   def parse_double(self):
     data = self.consume_double()
-    return ConstDouble(data)
+    return ConstReal(data)
 
   def parse_char(self):
     head = self.consume_ubyte()

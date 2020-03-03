@@ -95,8 +95,8 @@ class Interpreter:
           given_arity = len(inst.operand_str)
 
           value = frame.pop()
-          josa_map = list(value.josa_map)
-          if value.type == TYPE_FUNC:
+          if isinstance(value, ConstFunc):
+            josa_map = list(value.josa_map)
             args = []
             rest_arity = 0
 
@@ -126,7 +126,7 @@ class Interpreter:
 
           else:
             raise InvalidType(
-                u"%s 타입의 값은 호출 가능하지 않습니다." % get_type_name(value.type))
+                u"%s 타입의 값은 호출 가능하지 않습니다." % value.type_name())
 
         elif op == INST_JMP:
           pc = inst.operand_int
@@ -134,12 +134,12 @@ class Interpreter:
 
         elif op == INST_POP_JMP_IF_FALSE:
           value = frame.pop()
-          if value.type != TYPE_BOOLEAN:
+          if isinstance(value, ConstBoolean):
+            if value.boolval == False:
+              pc = inst.operand_int
+              continue
+          else:
             raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
-
-          if value.boolval == False:
-            pc = inst.operand_int
-            continue
 
         elif op == INST_FREE_VAR_LOCAL:
           value = frame.load_reserve(inst.operand_int)

@@ -1,53 +1,51 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import jit
 
-from error import InvalidType
-from constant_type import *
+from error import InvalidType, binary_typeerror, unary_typeerror
 
 
 class Constant:
-  _attrs_ = _immutable_fields_ = [
-      'intval', 'doubleval', 'boolval', 'charval', 'funcval', 'builtinval', 'josa_map', 'type']
+  # _attrs_ = _immutable_fields_ = [
+  #     'intval', 'doubleval', 'boolval', 'charval', 'funcval', 'builtinval', 'josa_map']
+  _attrs_ = []
 
   def add(self, other):
-    binary_typeerror(self.type, other.type, u"더하기")
+    binary_typeerror(self, other, u"더하기")
 
   def subtract(self, other):
-    binary_typeerror(self.type, other.type, u"빼기")
+    binary_typeerror(self, other, u"빼기")
 
   def multiply(self, other):
-    binary_typeerror(self.type, other.type, u"곱하기")
+    binary_typeerror(self, other, u"곱하기")
 
   def divide(self, other):
-    binary_typeerror(self.type, other.type, u"나누기")
+    binary_typeerror(self, other, u"나누기")
 
   def mod(self, other):
-    binary_typeerror(self.type, other.type, u"나머지")
+    binary_typeerror(self, other, u"나머지")
 
   def equal(self, other):
-    binary_typeerror(self.type, other.type, u"비교")
+    binary_typeerror(self, other, u"비교")
 
   def less_than(self, other):
-    binary_typeerror(self.type, other.type, u"대소 비교")
+    binary_typeerror(self, other, u"대소 비교")
 
   def greater_than(self, other):
-    binary_typeerror(self.type, other.type, u"대소 비교")
+    binary_typeerror(self, other, u"대소 비교")
 
   def negate(self):
-    unary_typeerror(self.type, u"반전")
+    unary_typeerror(self, u"반전")
 
   def show(self):
     raise NotImplementedError()
 
+  def type_name(self):
+    raise NotImplementedError()
+
 
 class ConstNone(Constant):
-  _attrs_ = _immutable_fields_ = ['type']
-
-  def __init__(self):
-    self.type = TYPE_NONE
-
   def equal(self, other):
-    if other.type == TYPE_NONE:
+    if isinstance(other, ConstNone):
       return ConstBoolean(True)
     else:
       return ConstBoolean(False)
@@ -55,73 +53,75 @@ class ConstNone(Constant):
   def show(self):
     return u"(없음)"
 
+  def type_name(self):
+    return u"(없음)"
+
 
 class ConstInteger(Constant):
-  _attrs_ = _immutable_fields_ = ['intval', 'type']
+  _attrs_ = _immutable_fields_ = ['intval']
 
   def __init__(self, value):
     self.intval = value
-    self.type = TYPE_INTEGER
 
   def add(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstInteger(self.intval + other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.intval + other.doubleval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.intval + other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"더하기")
+      binary_typeerror(self, other, u"더하기")
 
   def subtract(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstInteger(self.intval - other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.intval - other.doubleval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.intval - other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"빼기")
+      binary_typeerror(self, other, u"빼기")
 
   def multiply(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstInteger(self.intval * other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.intval * other.doubleval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.intval * other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"곱하기")
+      binary_typeerror(self, other, u"곱하기")
 
   def divide(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstInteger(self.intval / other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.intval / other.doubleval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.intval / other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"나누기")
+      binary_typeerror(self, other, u"나누기")
 
   def mod(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstInteger(self.intval % other.intval)
     else:
-      binary_typeerror(self.type, other.type, u"나머지")
+      binary_typeerror(self, other, u"나머지")
 
   def equal(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstBoolean(self.intval == other.intval)
     else:
       return ConstBoolean(False)
 
   def less_than(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstBoolean(self.intval < other.intval)
-    elif other.type == TYPE_REAL:
+    elif isinstance(other, ConstReal):
       return ConstBoolean(self.intval < other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
+      binary_typeerror(self, other, u"대소 비교")
 
   def greater_than(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstBoolean(self.intval > other.intval)
-    elif other.type == TYPE_REAL:
+    elif isinstance(other, ConstReal):
       return ConstBoolean(self.intval > other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
+      binary_typeerror(self, other, u"대소 비교")
 
   def negate(self):
     return ConstInteger(-self.intval)
@@ -129,81 +129,85 @@ class ConstInteger(Constant):
   def show(self):
     return str(self.intval).decode('utf-8')
 
+  def type_name(self):
+    return u"정수"
 
-class ConstDouble(Constant):
-  _attrs_ = _immutable_fields_ = ['doubleval', 'type']
+
+class ConstReal(Constant):
+  _attrs_ = _immutable_fields_ = ['doubleval']
 
   def __init__(self, value):
     self.doubleval = value
-    self.type = TYPE_REAL
 
   def add(self, other):
-    if other.type == TYPE_INTEGER:
-      return ConstDouble(self.doubleval + other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.doubleval + other.doubleval)
+    if isinstance(other, ConstInteger):
+      return ConstReal(self.doubleval + other.intval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.doubleval + other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"더하기")
+      binary_typeerror(self, other, u"더하기")
 
   def subtract(self, other):
-    if other.type == TYPE_INTEGER:
-      return ConstDouble(self.doubleval - other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.doubleval - other.doubleval)
+    if isinstance(other, ConstInteger):
+      return ConstReal(self.doubleval - other.intval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.doubleval - other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"빼기")
+      binary_typeerror(self, other, u"빼기")
 
   def multiply(self, other):
-    if other.type == TYPE_INTEGER:
-      return ConstDouble(self.doubleval * other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.doubleval * other.doubleval)
+    if isinstance(other, ConstInteger):
+      return ConstReal(self.doubleval * other.intval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.doubleval * other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"곱하기")
+      binary_typeerror(self, other, u"곱하기")
 
   def divide(self, other):
-    if other.type == TYPE_INTEGER:
-      return ConstDouble(self.doubleval / other.intval)
-    elif other.type == TYPE_REAL:
-      return ConstDouble(self.doubleval / other.doubleval)
+    if isinstance(other, ConstInteger):
+      return ConstReal(self.doubleval / other.intval)
+    elif isinstance(other, ConstReal):
+      return ConstReal(self.doubleval / other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"나누기")
+      binary_typeerror(self, other, u"나누기")
 
   def equal(self, other):
-    if other.type == TYPE_REAL:
+    if isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval == other.doubleval)
     else:
       return ConstBoolean(False)
 
   def less_than(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstBoolean(self.doubleval < other.intval)
-    elif other.type == TYPE_REAL:
+    elif isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval < other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
+      binary_typeerror(self, other, u"대소 비교")
 
   def greater_than(self, other):
-    if other.type == TYPE_INTEGER:
+    if isinstance(other, ConstInteger):
       return ConstBoolean(self.doubleval > other.intval)
-    elif other.type == TYPE_REAL:
+    elif isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval > other.doubleval)
     else:
-      binary_typeerror(self.type, other.type, u"대소 비교")
+      binary_typeerror(self, other, u"대소 비교")
 
   def show(self):
     return str(self.doubleval).decode('utf-8')
 
+  def type_name(self):
+    return u"실수"
+
 
 class ConstBoolean(Constant):
-  _attrs_ = _immutable_fields_ = ['boolval', 'type']
+  _attrs_ = _immutable_fields_ = ['boolval']
 
   def __init__(self, value):
     self.boolval = value
-    self.type = TYPE_BOOLEAN
 
   def equal(self, other):
-    if other.type == TYPE_BOOLEAN:
+    if isinstance(other, ConstBoolean):
       return ConstBoolean(self.boolval == other.boolval)
     else:
       return ConstBoolean(False)
@@ -214,16 +218,18 @@ class ConstBoolean(Constant):
   def show(self):
     return u"참" if self.boolval else u"거짓"
 
+  def type_name(self):
+    return u"부울"
+
 
 class ConstChar(Constant):
-  _attrs_ = _immutable_fields_ = ['charval', 'type']
+  _attrs_ = _immutable_fields_ = ['charval']
 
   def __init__(self, value):
     self.charval = value
-    self.type = TYPE_CHAR
 
   def equal(self, other):
-    if other.type == TYPE_CHAR:
+    if isinstance(other, ConstChar):
       return ConstBoolean(self.charval == other.charval)
     else:
       return ConstBoolean(False)
@@ -231,18 +237,23 @@ class ConstChar(Constant):
   def show(self):
     return self.charval
 
+  def type_name(self):
+    return u"문자"
+
 
 class ConstFunc(Constant):
-  _attrs_ = _immutable_fields_ = ['funcval', 'builtinval', 'josa_map', 'type']
+  _attrs_ = _immutable_fields_ = ['funcval', 'builtinval', 'josa_map']
 
   def __init__(self, josa_map, value, builtin_func=None):
     self.josa_map = josa_map
     self.funcval = value
     self.builtinval = builtin_func
-    self.type = TYPE_FUNC
 
   def show(self):
     return u"(함수)"
+
+  def type_name(self):
+    return u"함수"
 
   def copy(self):
     func = ConstFunc(self.josa_map, self.funcval.copy(), self.builtinval)
@@ -270,5 +281,5 @@ class CodeObject:
 class BuiltinObject:
   _attrs_ = _immutable_fields_ = ['func']
 
-  def __init__(self, arity, func):
+  def __init__(self, func):
     self.func = func

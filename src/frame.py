@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from rpython.rlib import jit
 
-from constant_type import *
-from constant import ConstNone
+from constant import ConstFunc
 
 
 class Frame:
@@ -38,13 +39,13 @@ class Frame:
   def load_reserve(self, index):
     """
     Free variable 등록이 아직 선언되지 않은 상수에 대해 적용되었을 때,
-    해당 위치에 ConstNone을 넣어주고 반환하는 함수입니다.
+    해당 위치에 비어있는 ConstFunc를 넣어주고 반환하는 함수입니다.
     """
     assert(index >= 0)
 
     value = self.local_list[index]
     if value is None:
-      self.local_list[index] = ConstNone()
+      self.local_list[index] = ConstFunc([], None, None)
       return self.local_list[index]
     else:
       return value
@@ -58,8 +59,7 @@ class Frame:
     assert(index >= 0)
 
     dest = self.local_list[index]
-    if dest.type == TYPE_NONE:
-      dest.type = TYPE_FUNC
+    if isinstance(dest, ConstFunc) and isinstance(value, ConstFunc):
       dest.funcval = value.funcval
       dest.builtinval = value.builtinval
       dest.josa_map = value.josa_map
