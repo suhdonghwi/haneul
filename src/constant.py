@@ -5,8 +5,6 @@ from error import InvalidType, binary_typeerror, unary_typeerror
 
 
 class Constant:
-  # _attrs_ = _immutable_fields_ = [
-  #     'intval', 'doubleval', 'boolval', 'charval', 'funcval', 'builtinval', 'josa_map']
   _attrs_ = []
 
   def add(self, other):
