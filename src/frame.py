@@ -36,6 +36,10 @@ class Frame:
     return self.local_list[index]
 
   def load_reserve(self, index):
+    """
+    Free variable 등록이 아직 선언되지 않은 상수에 대해 적용되었을 때,
+    해당 위치에 ConstNone을 넣어주고 반환하는 함수입니다.
+    """
     assert(index >= 0)
 
     value = self.local_list[index]
@@ -46,6 +50,11 @@ class Frame:
       return value
 
   def store(self, value, index):
+    """
+    로컬 인덱스를 받고 해당 위치에 값을 넣어주는 함수입니다.
+    해당 위치에 (`load_reserve`를 통해 저장된) ConstNone이 들어있으면
+    ConstNone 객체를 value로 바꿉니다.
+    """
     assert(index >= 0)
 
     dest = self.local_list[index]
