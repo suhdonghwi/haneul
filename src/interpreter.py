@@ -141,17 +141,24 @@ class Interpreter:
           else:
             raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
 
-        elif op == INST_FREE_VAR_LOCAL:
-          value = frame.load_reserve(inst.operand_int)
+        elif op == INST_FREE_VAR:
           func = frame.pop().copy()
-          func.funcval.free_vars.append(value)
+
+          for (is_free_var, index) in inst.operand_free_var_list:
+            if is_free_var:
+              value = code_object.free_vars[index]
+            else:
+              value = frame.load_reserve(index)
+
+            func.funcval.free_vars.append(value)
+
           frame.push(func)
 
-        elif op == INST_FREE_VAR_FREE:
-          value = code_object.free_vars[inst.operand_int]
-          func = frame.pop().copy()
-          func.funcval.free_vars.append(value)
-          frame.push(func)
+        # elif op == INST_FREE_VAR_FREE:
+        #   value = code_object.free_vars[inst.operand_int]
+        #   func = frame.pop().copy()
+        #   func.funcval.free_vars.append(value)
+        #   frame.push(func)
 
         elif op == INST_NEGATE:
           value = frame.pop()

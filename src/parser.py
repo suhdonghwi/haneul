@@ -112,8 +112,8 @@ class BytecodeParser:
     inst = Instruction(line_number, opcode)
     if opcode in (INST_PUSH, INST_LOAD, INST_STORE, INST_LOAD_DEREF, INST_STORE_GLOBAL, INST_LOAD_GLOBAL, INST_POP_JMP_IF_FALSE, INST_JMP):
       inst.operand_int = self.consume_uint()
-    elif opcode in (INST_FREE_VAR_LOCAL, INST_FREE_VAR_FREE):
-      inst.operand_int = self.consume_ubyte()
+    elif opcode == INST_FREE_VAR:
+      inst.operand_free_var_list = self.parse_free_var_list()
     elif opcode == INST_CALL:
       inst.operand_josa_list = self.parse_josa_list()
 
@@ -165,6 +165,18 @@ class BytecodeParser:
     result = []
     for i in range(0, count):
       result.append(self.parse_string_ubyte())
+
+    return result
+
+  def parse_free_var_list(self):
+    count = self.consume_ubyte()
+
+    result = []
+    for i in range(0, count):
+      is_free_var = self.consume_ubyte() == 1
+      index = self.consume_ubyte()
+
+      result.append((is_free_var, index))
 
     return result
 
