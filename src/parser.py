@@ -115,7 +115,7 @@ class BytecodeParser:
     elif opcode in (INST_FREE_VAR_LOCAL, INST_FREE_VAR_FREE):
       inst.operand_int = self.consume_ubyte()
     elif opcode == INST_CALL:
-      inst.operand_str = self.parse_josa_list()
+      inst.operand_josa_list = self.parse_josa_list()
 
     return inst
 

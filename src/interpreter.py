@@ -92,7 +92,7 @@ class Interpreter:
           self.env.store(frame.pop(), inst.operand_int)
 
         elif op == INST_CALL:
-          given_arity = len(inst.operand_str)
+          given_arity = len(inst.operand_josa_list)
 
           value = frame.pop()
           if isinstance(value, ConstFunc):
@@ -100,10 +100,10 @@ class Interpreter:
             args = []
             rest_arity = 0
 
-            if len(josa_map) == 1 and josa_map[0][0] == inst.operand_str[0]:
+            if len(josa_map) == 1 and josa_map[0][0] == inst.operand_josa_list[0]:
               args.append(frame.pop())
             else:
-              for josa in inst.operand_str:
+              for josa in inst.operand_josa_list:
                 (j, index) = resolve_josa(josa, josa_map)
                 josa_map[index] = (j, frame.pop())
 
