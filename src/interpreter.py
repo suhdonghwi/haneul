@@ -104,8 +104,8 @@ class Interpreter:
               args.append(frame.pop())
             else:
               for josa in inst.operand_josa_list:
-                (j, index) = resolve_josa(josa, josa_map)
-                josa_map[index] = (j, frame.pop())
+                (found_josa, index) = resolve_josa(josa, josa_map)
+                josa_map[index] = (found_josa, frame.pop())
 
               for (_, v) in josa_map:
                 args.append(v)
