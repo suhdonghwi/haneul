@@ -99,7 +99,7 @@ class Interpreter:
             args = []
             rest_arity = 0
 
-            if len(value.josa_map) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
+            if len(value.josa_map) == 1 and len(inst.operand_josa_list) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
               args.append(frame.pop())
             else:
               josa_map = list(value.josa_map)
@@ -153,12 +153,6 @@ class Interpreter:
             func.funcval.free_vars.append(value)
 
           frame.push(func)
-
-        # elif op == INST_FREE_VAR_FREE:
-        #   value = code_object.free_vars[inst.operand_int]
-        #   func = frame.pop().copy()
-        #   func.funcval.free_vars.append(value)
-        #   frame.push(func)
 
         elif op == INST_NEGATE:
           value = frame.pop()
