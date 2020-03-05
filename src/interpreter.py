@@ -96,13 +96,13 @@ class Interpreter:
 
           value = frame.pop()
           if isinstance(value, ConstFunc):
-            josa_map = list(value.josa_map)
             args = []
             rest_arity = 0
 
-            if len(josa_map) == 1 and josa_map[0][0] == inst.operand_josa_list[0]:
+            if len(value.josa_map) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
               args.append(frame.pop())
             else:
+              josa_map = list(value.josa_map)
               for josa in inst.operand_josa_list:
                 (found_josa, index) = resolve_josa(josa, josa_map)
                 josa_map[index] = (found_josa, frame.pop())
