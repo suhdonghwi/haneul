@@ -75,10 +75,10 @@ class Interpreter:
         elif op == INST_POP:
           frame.pop()
 
-        elif op == INST_LOAD:
+        elif op == INST_LOAD_LOCAL:
           frame.push(frame.load(inst.operand_int))
 
-        elif op == INST_STORE:
+        elif op == INST_STORE_LOCAL:
           # frame.append(frame.pop())
           frame.store(frame.pop(), inst.operand_int)
 

@@ -110,7 +110,7 @@ class BytecodeParser:
     opcode = self.consume_ubyte()
 
     inst = Instruction(line_number, opcode)
-    if opcode in (INST_PUSH, INST_LOAD, INST_STORE, INST_LOAD_DEREF, INST_STORE_GLOBAL, INST_LOAD_GLOBAL, INST_POP_JMP_IF_FALSE, INST_JMP):
+    if opcode in (INST_PUSH, INST_LOAD_LOCAL, INST_STORE_LOCAL, INST_LOAD_DEREF, INST_STORE_GLOBAL, INST_LOAD_GLOBAL, INST_POP_JMP_IF_FALSE, INST_JMP):
       inst.operand_int = self.consume_uint()
     elif opcode == INST_FREE_VAR:
       inst.operand_free_var_list = self.parse_free_var_list()
