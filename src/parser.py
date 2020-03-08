@@ -196,10 +196,11 @@ class BytecodeParser:
   def parse_program(self):
     global_var_names = self.parse_string_list()
     stack_size = self.consume_ulonglong()
+    local_count = self.consume_uint()
     const_table = self.parse_constant_list()
     code = self.parse_instruction_list()
 
-    return (global_var_names, stack_size, const_table, code)
+    return (global_var_names, stack_size, local_count, const_table, code)
 
 
 if __name__ == "__main__":
@@ -219,9 +220,10 @@ if __name__ == "__main__":
   os.close(fp)
 
   parser = BytecodeParser(content)
-  (global_var_names, stack_size, const_table, code) = parser.parse_program()
+  (global_var_names, stack_size, local_count,
+   const_table, code) = parser.parse_program()
 
-  code_object = CodeObject(const_table, code, 0, stack_size)
+  code_object = CodeObject(const_table, code, local_count, stack_size)
   interpreter = Interpreter(Env(global_var_names, default_globals))
   # program = Program(global_var_names, default_globals, frame)
   try:
