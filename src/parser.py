@@ -13,6 +13,8 @@ from environment import default_globals
 from rpython.rlib.rarithmetic import intmask
 from rpython.rlib.rstruct.runpack import runpack
 
+from target import *
+
 TYPE_NAMES = ['NONE', 'INTEGER', 'REAL', 'CHAR', 'BOOLEAN', 'FUNC']
 for (i, typename) in enumerate(TYPE_NAMES):
   globals()['TYPE_' + typename] = i
@@ -204,51 +206,4 @@ class BytecodeParser:
 
 
 if __name__ == "__main__":
-  try:
-    filename = sys.argv[1]
-  except IndexError:
-    print "파일이 필요합니다."
-    exit()
-
-  fp = os.open(filename, os.O_RDONLY, 0777)
-  content = ""
-  while True:
-    read = os.read(fp, 4096)
-    if len(read) == 0:
-      break
-    content += read
-  os.close(fp)
-
-  parser = BytecodeParser(content)
-  (global_var_names, stack_size, local_count,
-   const_table, code) = parser.parse_program()
-
-  code_object = CodeObject(const_table, code, local_count, stack_size)
-  interpreter = Interpreter(Env(global_var_names, default_globals))
-  # program = Program(global_var_names, default_globals, frame)
-  try:
-    interpreter.run(code_object, [])
-  except HaneulError as e:
-    print (u"%d번째 라인에서 에러 발생 : %s" % (e.error_line, e.message)).encode('utf-8')
-
-  # for name in global_var_names:
-  #   print name.encode('utf-8')
-
-  # for inst in code:
-  #   print instructions[inst.opcode]
-
-  # print "------------"
-
-  # def print_builtin_func(args):
-  #   print args[0].show().encode('utf-8')
-  #   return ConstNone()
-
-  # # print_builtin = ConstBuiltin(BuiltinObject(1, print_builtin_func))
-  # default_globals = []
-
-  # frame = CallFrame(const_table, code, [], 0)
-  # program = Program(global_var_names, [ConstInteger(1)])
-  # try:
-  #   program.run(frame)
-  # except HaneulError as e:
-  #   print (u"%d번째 라인에서 에러 발생 : %s" % (e.error_line, e.message)).encode('utf-8')
+  entry_point(sys.argv)
