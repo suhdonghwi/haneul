@@ -184,6 +184,7 @@ class BytecodeParser:
 
   def parse_funcobject(self):
     josa_list = self.parse_josa_list()
+    var_names = self.parse_string_list()
     stack_size = self.consume_ulonglong()
     local_number = self.consume_uint()
     const_table = self.parse_constant_list()
@@ -193,16 +194,7 @@ class BytecodeParser:
     for josa in josa_list:
       josa_map.append((josa, None))
 
-    return ConstFunc(josa_map, CodeObject(const_table, insts, local_number, stack_size))
-
-  def parse_program(self):
-    global_var_names = self.parse_string_list()
-    stack_size = self.consume_ulonglong()
-    local_count = self.consume_uint()
-    const_table = self.parse_constant_list()
-    code = self.parse_instruction_list()
-
-    return (global_var_names, stack_size, local_count, const_table, code)
+    return ConstFunc(josa_map, CodeObject(var_names, const_table, insts, local_number, stack_size))
 
 
 if __name__ == "__main__":

@@ -260,9 +260,10 @@ class ConstFunc(Constant):
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [
-      'const_table', 'code', 'local_number', 'stack_size', 'free_vars']
+      'var_names', 'const_table', 'code', 'local_number', 'stack_size', 'free_vars']
 
-  def __init__(self, const_table, code, local_number, stack_size, free_vars=[]):
+  def __init__(self, var_names, const_table, code, local_number, stack_size, free_vars=[]):
+    self.var_names = var_names
     self.const_table = const_table
     self.code = code
     self.local_number = local_number
@@ -274,7 +275,12 @@ class CodeObject:
     return self.const_table[index]
 
   def copy(self):
-    return CodeObject(self.const_table, self.code, self.local_number, self.stack_size, list(self.free_vars))
+    return CodeObject(self.var_names,
+                      self.const_table,
+                      self.code,
+                      self.local_number,
+                      self.stack_size,
+                      list(self.free_vars))
 
 
 class BuiltinObject:

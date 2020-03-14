@@ -26,11 +26,10 @@ def entry_point(argv):
   os.close(fp)
 
   parser = BytecodeParser(content)
-  (global_var_names, stack_size, local_count,
-   const_table, code) = parser.parse_program()
+  func_object = parser.parse_funcobject()
 
-  code_object = CodeObject(const_table, code, local_count, stack_size)
-  interpreter = Interpreter(Env(global_var_names, default_globals))
+  code_object = func_object.funcval
+  interpreter = Interpreter(Env(default_globals))
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:

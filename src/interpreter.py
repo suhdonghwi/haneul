@@ -31,25 +31,18 @@ def resize_list(l, size, value=None):
 
 
 class Env:
-  _immutable_fields_ = ['var_names[*]']
+  def __init__(self, var_map):
+    self.var_map = var_map
 
-  def __init__(self, var_names, vars):
-    self.var_names = var_names
-
-    resize_list(vars, len(var_names))
-    self.vars = vars
-
-  def store(self, value, index):
-    self.vars[index] = value
+  def store(self, name, value):
+    self.var_map[name] = value
 
   @jit.elidable
-  def lookup(self, index):
-    result = self.vars[index]
-    if result is None:
-      raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." %
-                            self.var_names[index])
-    else:
-      return result
+  def lookup(self, name):
+    try:
+      return self.var_map[name]
+    except KeyError:
+      raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." % name)
 
 
 class Interpreter:
@@ -86,10 +79,10 @@ class Interpreter:
           frame.push(code_object.free_vars[inst.operand_int])
 
         elif op == INST_LOAD_GLOBAL:
-          frame.push(self.env.lookup(inst.operand_int))
+          frame.push(self.env.lookup(code_object.var_names[inst.operand_int]))
 
         elif op == INST_STORE_GLOBAL:
-          self.env.store(frame.pop(), inst.operand_int)
+          self.env.store(code_object.var_names[inst.operand_int], frame.pop())
 
         elif op == INST_CALL:
           given_arity = len(inst.operand_josa_list)
