@@ -1,6 +1,6 @@
 INSTRUCTION_NAMES = ['PUSH', 'POP', 'LOAD_LOCAL', 'STORE_LOCAL', 'LOAD_DEREF', 'STORE_GLOBAL', 'LOAD_GLOBAL',
                      'CALL', 'JMP', 'POP_JMP_IF_FALSE', 'FREE_VAR', 'ADD', 'SUBTRACT', 'MULTIPLY',
-                     'DIVIDE', 'MOD', 'EQUAL', 'LESS_THAN', 'GREATER_THAN', 'NEGATE']
+                     'DIVIDE', 'MOD', 'EQUAL', 'LESS_THAN', 'GREATER_THAN', 'NEGATE', "LOGIC_NOT", "LOGIC_AND", "LOGIC_OR"]
 for (i, inst) in enumerate(INSTRUCTION_NAMES):
   globals()['INST_' + inst] = i
 

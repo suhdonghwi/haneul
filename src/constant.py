@@ -32,7 +32,16 @@ class Constant:
     binary_typeerror(self, other, u"대소 비교")
 
   def negate(self):
-    unary_typeerror(self, u"반전")
+    unary_typeerror(self, u"부호 반전")
+
+  def logic_not(self):
+    unary_typeerror(self, u"논리 부정")
+
+  def logic_and(self, other):
+    binary_typeerror(self, other, u"그리고")
+
+  def logic_or(self, other):
+    binary_typeerror(self, other, u"또는")
 
   def show(self):
     raise NotImplementedError()
@@ -210,8 +219,20 @@ class ConstBoolean(Constant):
     else:
       return ConstBoolean(False)
 
-  def negate(self):
+  def logic_not(self):
     return ConstBoolean(not self.boolval)
+
+  def logic_and(self, other):
+    if isinstance(other, ConstBoolean):
+      return ConstBoolean(self.boolval and other.boolval)
+    else:
+      binary_typeerror(self, other, u"그리고")
+
+  def logic_or(self, other):
+    if isinstance(other, ConstBoolean):
+      return ConstBoolean(self.boolval or other.boolval)
+    else:
+      binary_typeerror(self, other, u"그리고")
 
   def show(self):
     return u"참" if self.boolval else u"거짓"

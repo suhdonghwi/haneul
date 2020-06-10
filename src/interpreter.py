@@ -150,6 +150,9 @@ class Interpreter:
         elif op == INST_NEGATE:
           value = frame.pop()
           frame.push(value.negate())
+        elif op == INST_LOGIC_NOT:
+          value = frame.pop()
+          frame.push(value.logic_not())
         else:
           rhs, lhs = frame.pop(), frame.pop()
           if op == INST_ADD:
@@ -168,6 +171,10 @@ class Interpreter:
             frame.push(lhs.less_than(rhs))
           elif op == INST_GREATER_THAN:
             frame.push(lhs.greater_than(rhs))
+          elif op == INST_LOGIC_AND:
+            frame.push(lhs.logic_and(rhs))
+          elif op == INST_LOGIC_OR:
+            frame.push(lhs.logic_or(rhs))
 
         pc += 1
       except HaneulError as e:
