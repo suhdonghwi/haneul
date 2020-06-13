@@ -3,7 +3,7 @@ from rpython.rlib import jit
 
 from instruction import *
 from constant import *
-from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa
+from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa, UndefinedFunction
 from frame import Frame
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
@@ -91,6 +91,9 @@ class Interpreter:
           if isinstance(value, ConstFunc):
             args = []
             rest_arity = 0
+
+            if value.josa_map is None:
+              raise UndefinedFunction(u"선언은 되었으나 정의되지 않은 함수를 호출할 수 없습니다.")
 
             if len(value.josa_map) == 1 and len(inst.operand_josa_list) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
               args.append(frame.pop())

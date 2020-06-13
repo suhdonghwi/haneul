@@ -38,14 +38,14 @@ class Frame:
 
   def load_reserve(self, index):
     """
-    Free variable 등록이 아직 선언되지 않은 상수에 대해 적용되었을 때,
+    Free variable 등록이 아직 정의되지 않은 상수에 대해 적용되었을 때,
     해당 위치에 비어있는 ConstFunc를 넣어주고 반환하는 함수입니다.
     """
     assert(index >= 0)
 
     value = self.local_list[index]
     if value is None:
-      self.local_list[index] = ConstFunc([], None, None)
+      self.local_list[index] = ConstFunc(None, None, None)
       return self.local_list[index]
     else:
       return value
