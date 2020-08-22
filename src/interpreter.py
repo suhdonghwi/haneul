@@ -186,7 +186,7 @@ class Interpreter:
         if e.error_line == 0:
           e.error_line = error_line
         
-        self.stack_trace.append(error_line)
+        self.stack_trace.append((code_object.name.encode('utf-8'), error_line))
         raise e
 
     if frame.stack_top == 0:
