@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import jit
 
-from error import InvalidType, binary_typeerror, unary_typeerror
+from error import InvalidType, DivideByZero, binary_typeerror, unary_typeerror
 
 
 class Constant:
@@ -96,14 +96,20 @@ class ConstInteger(Constant):
 
   def divide(self, other):
     if isinstance(other, ConstInteger):
+      if other.intval == 0:
+        raise DivideByZero(u"0으로 나눌 수 없습니다.")
       return ConstInteger(self.intval / other.intval)
     elif isinstance(other, ConstReal):
+      if other.doubleval == 0:
+        raise DivideByZero(u"0으로 나눌 수 없습니다.")
       return ConstReal(self.intval / other.doubleval)
     else:
       binary_typeerror(self, other, u"나누기")
 
   def mod(self, other):
     if isinstance(other, ConstInteger):
+      if other.intval == 0:
+        raise DivideByZero(u"0으로 나눌 수 없습니다.")
       return ConstInteger(self.intval % other.intval)
     else:
       binary_typeerror(self, other, u"나머지")
@@ -172,8 +178,12 @@ class ConstReal(Constant):
 
   def divide(self, other):
     if isinstance(other, ConstInteger):
+      if other.intval == 0:
+        raise DivideByZero(u"0으로 나눌 수 없습니다.")
       return ConstReal(self.doubleval / other.intval)
     elif isinstance(other, ConstReal):
+      if other.doubleval == 0:
+        raise DivideByZero(u"0으로 나눌 수 없습니다.")
       return ConstReal(self.doubleval / other.doubleval)
     else:
       binary_typeerror(self, other, u"나누기")
