@@ -6,11 +6,9 @@ for (i, inst) in enumerate(INSTRUCTION_NAMES):
 
 
 class Instruction:
-  _immutable_fields_ = ['line_number',
-                        'opcode', 'operand_int', 'operand_josa_list[*]']
+  _immutable_fields_ = ['opcode', 'operand_int', 'operand_josa_list[*]']
 
-  def __init__(self, line_number, opcode):
-    self.line_number = line_number
+  def __init__(self, opcode):
     self.opcode = opcode
     self.operand_int = 0
     self.operand_josa_list = None

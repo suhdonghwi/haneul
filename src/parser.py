@@ -108,10 +108,9 @@ class BytecodeParser:
     return ConstBoolean(value == 1)
 
   def parse_instruction(self):
-    line_number = self.consume_uint()
     opcode = self.consume_ubyte()
 
-    inst = Instruction(line_number, opcode)
+    inst = Instruction(opcode)
     if opcode in (INST_PUSH, INST_LOAD_LOCAL, INST_STORE_LOCAL, INST_LOAD_DEREF, INST_STORE_GLOBAL, INST_LOAD_GLOBAL, INST_POP_JMP_IF_FALSE, INST_JMP):
       inst.operand_int = self.consume_uint()
     elif opcode == INST_FREE_VAR:
@@ -182,12 +181,25 @@ class BytecodeParser:
 
     return result
 
+  def parse_line_no_table(self):
+    count = self.consume_ulonglong()
+
+    result = []
+    for i in range(0, count):
+      inst_offset = self.consume_uint()
+      line_diff = self.consume_ushort()
+      result.append((inst_offset, line_diff))
+
+    return result
+
   def parse_funcobject(self):
     josa_list = self.parse_josa_list()
     var_names = self.parse_string_list()
     stack_size = self.consume_ulonglong()
     local_number = self.consume_uint()
     const_table = self.parse_constant_list()
+    line_no = self.consume_ushort()
+    line_no_table = self.parse_line_no_table()
     insts = self.parse_instruction_list()
 
     josa_map = []
