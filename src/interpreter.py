@@ -182,8 +182,7 @@ class Interpreter:
         pc += 1
       except HaneulError as e:
         if e.error_line == 0:
-          # e.error_line = inst.line_number
-          e.error_line = 1
+          e.error_line = code_object.calculate_line(pc)
         raise e
 
     if frame.stack_top == 0:

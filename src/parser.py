@@ -206,7 +206,7 @@ class BytecodeParser:
     for josa in josa_list:
       josa_map.append((josa, None))
 
-    return ConstFunc(josa_map, CodeObject(var_names, const_table, insts, local_number, stack_size))
+    return ConstFunc(josa_map, CodeObject(var_names, const_table, insts, local_number, stack_size, line_no, line_no_table))
 
 
 if __name__ == "__main__":

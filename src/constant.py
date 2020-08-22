@@ -291,19 +291,33 @@ class ConstFunc(Constant):
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [
-      'var_names', 'const_table', 'code', 'local_number', 'stack_size', 'free_vars']
+      'var_names', 'const_table', 'code', 'local_number', 'stack_size', 'line_no', 'line_no_table', 'free_vars'
+  ]
 
-  def __init__(self, var_names, const_table, code, local_number, stack_size, free_vars=[]):
+  def __init__(self, var_names, const_table, code, local_number, stack_size, line_no, line_no_table, free_vars=[]):
     self.var_names = var_names
     self.const_table = const_table
     self.code = code
     self.local_number = local_number
     self.stack_size = stack_size
+    self.line_no = line_no
+    self.line_no_table = line_no_table
     self.free_vars = free_vars
 
   @jit.elidable
   def get_constant(self, index):
     return self.const_table[index]
+  
+  def calculate_line(self, pc):
+    line = self.line_no
+
+    for (inst_offset, line_diff) in self.line_no_table:
+      if pc >= inst_offset:
+        line += line_diff
+      else:
+        break
+    
+    return line
 
   def copy(self):
     return CodeObject(self.var_names,
@@ -311,6 +325,8 @@ class CodeObject:
                       self.code,
                       self.local_number,
                       self.stack_size,
+                      self.line_no,
+                      self.line_no_table,
                       list(self.free_vars))
 
 
