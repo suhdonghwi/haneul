@@ -48,6 +48,7 @@ class Env:
 class Interpreter:
   def __init__(self, env):
     self.env = env
+    self.stack_trace = []
 
   def run(self, code_object, args):
     pc = 0
@@ -181,8 +182,11 @@ class Interpreter:
 
         pc += 1
       except HaneulError as e:
+        error_line = code_object.calculate_line(pc)
         if e.error_line == 0:
-          e.error_line = code_object.calculate_line(pc)
+          e.error_line = error_line
+        
+        self.stack_trace.append(error_line)
         raise e
 
     if frame.stack_top == 0:
