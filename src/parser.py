@@ -198,6 +198,7 @@ class BytecodeParser:
     stack_size = self.consume_ulonglong()
     local_number = self.consume_uint()
     const_table = self.parse_constant_list()
+    name = self.parse_string()
     line_no = self.consume_ushort()
     line_no_table = self.parse_line_no_table()
     insts = self.parse_instruction_list()
@@ -206,7 +207,7 @@ class BytecodeParser:
     for josa in josa_list:
       josa_map.append((josa, None))
 
-    return ConstFunc(josa_map, CodeObject(var_names, const_table, insts, local_number, stack_size, line_no, line_no_table))
+    return ConstFunc(josa_map, CodeObject(var_names, const_table, name, insts, local_number, stack_size, line_no, line_no_table))
 
 
 if __name__ == "__main__":
