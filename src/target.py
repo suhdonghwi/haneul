@@ -34,8 +34,25 @@ def entry_point(argv):
     interpreter.run(code_object, [])
   except HaneulError as e:
     for (name, path, line) in reversed(interpreter.stack_trace):
-      print (u"파일 '%s', %d번째 줄, %s:" % (path, line, name)).encode('utf-8')
+      if name == u"":
+        print (u"파일 '%s', %d번째 줄:" % (path, line)).encode('utf-8')
+      else:
+        print (u"파일 '%s', %d번째 줄, %s:" % (path, line, name)).encode('utf-8')
 
+    (_, path, line) = interpreter.stack_trace[0]
+    error_file = open(path.encode('utf-8'), 'r') 
+    last_line = None
+    for i in range(0, line):
+      last_line = error_file.readline()
+
+    assert last_line is not None
+    if last_line[-1] == '\n':
+      last_line = last_line[:-1]
+
+    line_width = len(str(line))
+    print (" " * line_width) + " |"
+    print "%d | %s" % (line, last_line)
+    print (" " * line_width) + " |"
     print e.message.encode('utf-8')
 
   return 0
