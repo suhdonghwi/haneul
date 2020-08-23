@@ -33,8 +33,10 @@ def entry_point(argv):
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:
-    print (interpreter.stack_trace)
-    print (u"%d번째 라인에서 에러 발생 : %s" % (e.error_line, e.message)).encode('utf-8')
+    for (name, path, line) in reversed(interpreter.stack_trace):
+      print (u"파일 '%s', %d번째 줄, %s:" % (path, line, name)).encode('utf-8')
+
+    print e.message.encode('utf-8')
 
   return 0
 

@@ -291,13 +291,14 @@ class ConstFunc(Constant):
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [
-      'var_names', 'const_table', 'name', 'code', 'local_number', 'stack_size', 'line_no', 'line_no_table', 'free_vars'
+      'var_names', 'const_table', 'name', 'file_path', 'code', 'local_number', 'stack_size', 'line_no', 'line_no_table', 'free_vars'
   ]
 
-  def __init__(self, var_names, const_table, name, code, local_number, stack_size, line_no, line_no_table, free_vars=[]):
+  def __init__(self, var_names, const_table, name, file_path, code, local_number, stack_size, line_no, line_no_table, free_vars=[]):
     self.var_names = var_names
     self.const_table = const_table
     self.name = name
+    self.file_path = file_path
     self.code = code
     self.local_number = local_number
     self.stack_size = stack_size
@@ -324,6 +325,7 @@ class CodeObject:
     return CodeObject(self.var_names,
                       self.const_table,
                       self.name,
+                      self.file_path,
                       self.code,
                       self.local_number,
                       self.stack_size,
