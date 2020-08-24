@@ -1,3 +1,4 @@
 *.pyc
 *.hn
 target-c
+logfile
