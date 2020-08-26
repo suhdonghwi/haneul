@@ -294,6 +294,20 @@ class ConstStruct(Constant):
   def __init__(self, struct_map):
     self.struct_map = struct_map
 
+  def equal(self, other):
+    if isinstance(other, ConstStruct):
+      if len(self.struct_map) == len(other.struct_map):
+        for k in self.struct_map.keys():
+          try:
+            if not self.struct_map[k].equal(other.struct_map[k]):
+              return ConstBoolean(False)
+          except:
+            return ConstBoolean(False)
+        
+        return ConstBoolean(True)
+    else:
+      return ConstBoolean(False)
+
   def show(self):
     result = u"{"
     items = self.struct_map.items()
