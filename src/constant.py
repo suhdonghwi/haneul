@@ -299,7 +299,7 @@ class ConstStruct(Constant):
       if len(self.struct_map) == len(other.struct_map):
         for k in self.struct_map.keys():
           try:
-            if not self.struct_map[k].equal(other.struct_map[k]):
+            if not self.struct_map[k].equal(other.struct_map[k]).boolval:
               return ConstBoolean(False)
           except:
             return ConstBoolean(False)
