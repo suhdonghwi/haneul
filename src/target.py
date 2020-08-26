@@ -29,7 +29,7 @@ def entry_point(argv):
   func_object = parser.parse_funcobject()
 
   code_object = func_object.funcval
-  interpreter = Interpreter(Env(default_globals))
+  interpreter = Interpreter(Env(default_globals, {}))
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:

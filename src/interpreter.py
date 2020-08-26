@@ -3,7 +3,7 @@ from rpython.rlib import jit
 
 from instruction import *
 from constant import *
-from error import HaneulError, InvalidType, ArgNumberMismatch, UnboundVariable, UnboundJosa, UndefinedFunction
+from error import *
 from frame import Frame
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
@@ -29,13 +29,16 @@ def resolve_josa(josa, josa_map):
 def resize_list(l, size, value=None):
   l.extend([value] * (size - len(l)))
 
-
 class Env:
-  def __init__(self, var_map):
+  def __init__(self, var_map, struct_map):
     self.var_map = var_map
+    self.struct_map = struct_map
 
   def store(self, name, value):
     self.var_map[name] = value
+  
+  def add_struct(self, name, fields):
+    self.struct_map[name] = fields
 
   @jit.elidable
   def lookup(self, name):
@@ -43,6 +46,13 @@ class Env:
       return self.var_map[name]
     except KeyError:
       raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." % name)
+  
+  @jit.elidable
+  def lookup_struct(self, name):
+    try:
+      return self.struct_map[name]
+    except KeyError:
+      raise UndefinedStruct(u"구조체 '%s'를 찾을 수 없습니다." % name)
 
 
 class Interpreter:
@@ -124,19 +134,32 @@ class Interpreter:
           else:
             raise InvalidType(
                 u"%s 타입의 값은 호출 가능하지 않습니다." % value.type_name())
+
+        elif op == INST_ADD_STRUCT:
+          self.env.add_struct(inst.operand_str, inst.operand_josa_list)
         
         elif op == INST_MAKE_STRUCT:
-          struct_map = {}
+          fields = self.env.lookup_struct(inst.operand_str)
+          struct_data = {}
+
           for field in inst.operand_josa_list:
+            if field not in fields:
+              raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
+
             value = frame.pop()
-            struct_map[field] = value
+            struct_data[field] = value
           
-          frame.push(ConstStruct(struct_map))
+          frame.push(ConstStruct(struct_data))
 
         elif op == INST_GET_FIELD:
           value = frame.pop()
+          field = inst.operand_str
+
           assert isinstance(value, ConstStruct)
-          frame.push(value.struct_map[inst.operand_str])
+          if field in value.struct_data:
+            frame.push(value.struct_data[field])
+          else:
+            raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
 
         elif op == INST_JMP:
           pc = inst.operand_int

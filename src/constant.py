@@ -289,17 +289,17 @@ class ConstFunc(Constant):
     return func
 
 class ConstStruct(Constant):
-  _attrs_ = _immutable_fields_ = ['struct_map']
+  _attrs_ = _immutable_fields_ = ['struct_data']
 
-  def __init__(self, struct_map):
-    self.struct_map = struct_map
+  def __init__(self, struct_data):
+    self.struct_data = struct_data
 
   def equal(self, other):
     if isinstance(other, ConstStruct):
-      if len(self.struct_map) == len(other.struct_map):
-        for k in self.struct_map.keys():
+      if len(self.struct_data) == len(other.struct_data):
+        for k in self.struct_data.keys():
           try:
-            if not self.struct_map[k].equal(other.struct_map[k]).boolval:
+            if not self.struct_data[k].equal(other.struct_data[k]).boolval:
               return ConstBoolean(False)
           except:
             return ConstBoolean(False)
@@ -310,7 +310,7 @@ class ConstStruct(Constant):
 
   def show(self):
     result = u"{"
-    items = self.struct_map.items()
+    items = self.struct_data.items()
     for (k, v) in items[:-1]:
       result += k + u": " + v.show() + u", "
     (k, v) = items[-1]
@@ -322,7 +322,7 @@ class ConstStruct(Constant):
     return u"구조체"
 
   def copy(self):
-    return ConstStruct(self.struct_map)
+    return ConstStruct(self.struct_data)
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [

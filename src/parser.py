@@ -115,7 +115,10 @@ class BytecodeParser:
       inst.operand_int = self.consume_uint()
     elif opcode == INST_FREE_VAR:
       inst.operand_free_var_list = self.parse_free_var_list()
-    elif opcode in (INST_CALL, INST_MAKE_STRUCT):
+    elif opcode == INST_CALL:
+      inst.operand_josa_list = self.parse_josa_list()
+    elif opcode in (INST_ADD_STRUCT, INST_MAKE_STRUCT):
+      inst.operand_str = self.parse_string_ubyte()
       inst.operand_josa_list = self.parse_josa_list()
     elif opcode == INST_GET_FIELD:
       inst.operand_str = self.parse_string_ubyte()

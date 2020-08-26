@@ -31,6 +31,14 @@ class UndefinedFunction(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
 
+class UndefinedStruct(HaneulError):
+  def __init__(self, message):
+    HaneulError.__init__(self, message)
+
+class UnknownField(HaneulError):
+  def __init__(self, message):
+    HaneulError.__init__(self, message)
+
 class DivideByZero(HaneulError):
   def __init__(self, message):
     HaneulError.__init__(self, message)
