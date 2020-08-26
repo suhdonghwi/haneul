@@ -264,7 +264,7 @@ class ConstChar(Constant):
       return ConstBoolean(False)
 
   def show(self):
-    return self.charval
+    return u"'" + self.charval + u"'"
 
   def type_name(self):
     return u"문자"
