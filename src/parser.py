@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-sys.path.append('/home/suhdonghwi/Documents/util/pypy')
+sys.path.append('/Users/suhdonghwi/Documents/utils/pypy')
 
 import math
 
@@ -115,8 +115,11 @@ class BytecodeParser:
       inst.operand_int = self.consume_uint()
     elif opcode == INST_FREE_VAR:
       inst.operand_free_var_list = self.parse_free_var_list()
-    elif opcode == INST_CALL:
+    elif opcode in (INST_CALL, INST_MAKE_STRUCT):
       inst.operand_josa_list = self.parse_josa_list()
+    elif opcode == INST_GET_FIELD:
+      inst.operand_str = self.parse_string_ubyte()
+
 
     return inst
 

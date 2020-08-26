@@ -288,6 +288,27 @@ class ConstFunc(Constant):
     func = ConstFunc(self.josa_map, self.funcval.copy(), self.builtinval)
     return func
 
+class ConstStruct(Constant):
+  _attrs_ = _immutable_fields_ = ['struct_map']
+
+  def __init__(self, struct_map):
+    self.struct_map = struct_map
+
+  def show(self):
+    result = u"{"
+    items = self.struct_map.items()
+    for (k, v) in items[:-1]:
+      result += k + u": " + v.show() + u", "
+    (k, v) = items[-1]
+    result += k + u": " + v.show() + u"}"
+
+    return result
+
+  def type_name(self):
+    return u"구조체"
+
+  def copy(self):
+    return ConstStruct(self.struct_map)
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [

@@ -124,6 +124,19 @@ class Interpreter:
           else:
             raise InvalidType(
                 u"%s 타입의 값은 호출 가능하지 않습니다." % value.type_name())
+        
+        elif op == INST_MAKE_STRUCT:
+          struct_map = {}
+          for field in inst.operand_josa_list:
+            value = frame.pop()
+            struct_map[field] = value
+          
+          frame.push(ConstStruct(struct_map))
+
+        elif op == INST_GET_FIELD:
+          value = frame.pop()
+          assert isinstance(value, ConstStruct)
+          frame.push(value.struct_map[inst.operand_str])
 
         elif op == INST_JMP:
           pc = inst.operand_int
@@ -147,6 +160,7 @@ class Interpreter:
             else:
               value = frame.load_reserve(index)
 
+            assert isinstance(func, ConstFunc)
             func.funcval.free_vars.append(value)
 
           frame.push(func)
