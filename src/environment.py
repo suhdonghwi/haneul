@@ -9,3 +9,4 @@ def print_builtin_func(args):
 
 print_builtin = ConstFunc([(u"을", None)], None, print_builtin_func)
 default_globals = {u"보여주다": print_builtin}
+default_structs = {}

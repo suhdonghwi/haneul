@@ -6,7 +6,7 @@ from parser import BytecodeParser
 from error import HaneulError
 from constant import ConstInteger
 
-from environment import default_globals
+from environment import default_globals, default_structs
 
 
 def entry_point(argv):
@@ -29,7 +29,7 @@ def entry_point(argv):
   func_object = parser.parse_funcobject()
 
   code_object = func_object.funcval
-  interpreter = Interpreter(Env(default_globals, {}))
+  interpreter = Interpreter(Env(default_globals, default_structs))
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:
