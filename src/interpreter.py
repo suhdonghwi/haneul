@@ -142,6 +142,12 @@ class Interpreter:
           fields = self.env.lookup_struct(inst.operand_str)
           struct_data = {}
 
+          expected_field_num = len(fields)
+          given_field_num = len(inst.operand_josa_list)
+
+          if expected_field_num != given_field_num:
+            raise FieldNumberMismatch(u"이 구조체에는 %d개의 필드가 있는데 %d개가 주어졌습니다." % (expected_field_num, given_field_num))
+
           for field in inst.operand_josa_list:
             if field not in fields:
               raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
