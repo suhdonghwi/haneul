@@ -18,12 +18,12 @@ def resolve_josa(josa, josa_map):
     for (j, (k, v)) in enumerate(josa_map):
       if v is None:
         return (k, j)
-    raise InvalidType(u"이 함수에는 더 이상 값을 적용할 수 없습니다.")
+    raise HaneulError(u"이 함수에는 더 이상 값을 적용할 수 없습니다.")
   else:
     for (j, (k, v)) in enumerate(josa_map):
       if josa == k:
         return (josa, j)
-    raise UnboundJosa(u"조사 '%s'를 찾을 수 없습니다." % josa)
+    raise UnboundJosa(josa)
 
 
 def resize_list(l, size, value=None):
@@ -45,14 +45,14 @@ class Env:
     try:
       return self.var_map[name]
     except KeyError:
-      raise UnboundVariable(u"변수 '%s'를 찾을 수 없습니다." % name)
+      raise UnboundVariable(name)
   
   @jit.elidable
   def lookup_struct(self, name):
     try:
       return self.struct_map[name]
     except KeyError:
-      raise UndefinedStruct(u"구조체 '%s'를 찾을 수 없습니다." % name)
+      raise UndefinedStruct(name)
 
 
 class Interpreter:
@@ -104,7 +104,7 @@ class Interpreter:
             rest_arity = 0
 
             if value.josa_map is None:
-              raise UndefinedFunction(u"선언은 되었으나 정의되지 않은 함수를 호출할 수 없습니다.")
+              raise UndefinedFunction()
 
             if len(value.josa_map) == 1 and len(inst.operand_josa_list) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
               args.append(frame.pop())
@@ -132,8 +132,7 @@ class Interpreter:
                 frame.push(func_result)
 
           else:
-            raise InvalidType(
-                u"%s 타입의 값은 호출 가능하지 않습니다." % value.type_name())
+            raise InvalidType(u"함수", value.type_name())
 
         elif op == INST_ADD_STRUCT:
           self.env.add_struct(inst.operand_str, inst.operand_josa_list)
@@ -146,11 +145,11 @@ class Interpreter:
           given_field_num = len(inst.operand_josa_list)
 
           if expected_field_num != given_field_num:
-            raise FieldNumberMismatch(u"이 구조체에는 %d개의 필드가 있는데 %d개가 주어졌습니다." % (expected_field_num, given_field_num))
+            raise FieldNumberMismatch(expected_field_num, given_field_num)
 
           for field in inst.operand_josa_list:
             if field not in fields:
-              raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
+              raise UnknownField(field)
 
             value = frame.pop()
             struct_data[field] = value
@@ -165,9 +164,9 @@ class Interpreter:
             if field in value.struct_data:
               frame.push(value.struct_data[field])
             else:
-              raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
+              raise UnknownField(field)
           else:
-            raise InvalidType(u"이 연산은 구조체에만 사용할 수 있습니다.")
+            raise InvalidType(u"구조체", value.type_name())
 
         elif op == INST_JMP:
           pc = inst.operand_int
@@ -180,7 +179,7 @@ class Interpreter:
               pc = inst.operand_int
               continue
           else:
-            raise InvalidType(u"여기에는 참 또는 거짓 타입을 필요로 합니다.")
+            raise InvalidType(u"참 또는 거짓", value.type_name())
 
         elif op == INST_FREE_VAR:
           func = frame.pop().copy()

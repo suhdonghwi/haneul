@@ -16,7 +16,7 @@ def print_char_builtin_func(args):
     os.write(1, ch.charval.encode('utf-8'))
     return ConstNone()
   else:
-    raise InvalidType(u"이 함수는 문자만 사용할 수 있습니다.")
+    raise InvalidType(u"문자", ch.type_name())
 
 
 print_builtin = ConstFunc([(u"을", None)], None, print_builtin_func)

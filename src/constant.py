@@ -1,47 +1,47 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import jit
 
-from error import InvalidType, DivideByZero, binary_typeerror, unary_typeerror
+from error import InvalidType, DivideByZero, BinaryTypeError, UnaryTypeError
 
 
 class Constant:
   _attrs_ = []
 
   def add(self, other):
-    binary_typeerror(self, other, u"더하기")
+    raise BinaryTypeError(self, other, u"더하기")
 
   def subtract(self, other):
-    binary_typeerror(self, other, u"빼기")
+    raise BinaryTypeError(self, other, u"빼기")
 
   def multiply(self, other):
-    binary_typeerror(self, other, u"곱하기")
+    raise BinaryTypeError(self, other, u"곱하기")
 
   def divide(self, other):
-    binary_typeerror(self, other, u"나누기")
+    raise BinaryTypeError(self, other, u"나누기")
 
   def mod(self, other):
-    binary_typeerror(self, other, u"나머지")
+    raise BinaryTypeError(self, other, u"나머지")
 
   def equal(self, other):
-    binary_typeerror(self, other, u"비교")
+    raise BinaryTypeError(self, other, u"비교")
 
   def less_than(self, other):
-    binary_typeerror(self, other, u"대소 비교")
+    raise BinaryTypeError(self, other, u"대소 비교")
 
   def greater_than(self, other):
-    binary_typeerror(self, other, u"대소 비교")
+    raise BinaryTypeError(self, other, u"대소 비교")
 
   def negate(self):
-    unary_typeerror(self, u"부호 반전")
+    raise UnaryTypeError(self, u"부호 반전")
 
   def logic_not(self):
-    unary_typeerror(self, u"논리 부정")
+    raise UnaryTypeError(self, u"논리 부정")
 
   def logic_and(self, other):
-    binary_typeerror(self, other, u"그리고")
+    raise BinaryTypeError(self, other, u"그리고")
 
   def logic_or(self, other):
-    binary_typeerror(self, other, u"또는")
+    raise BinaryTypeError(self, other, u"또는")
 
   def show(self):
     raise NotImplementedError()
@@ -76,7 +76,7 @@ class ConstInteger(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.intval + other.doubleval)
     else:
-      binary_typeerror(self, other, u"더하기")
+      raise BinaryTypeError(self, other, u"더하기")
 
   def subtract(self, other):
     if isinstance(other, ConstInteger):
@@ -84,7 +84,7 @@ class ConstInteger(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.intval - other.doubleval)
     else:
-      binary_typeerror(self, other, u"빼기")
+      raise BinaryTypeError(self, other, u"빼기")
 
   def multiply(self, other):
     if isinstance(other, ConstInteger):
@@ -92,27 +92,27 @@ class ConstInteger(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.intval * other.doubleval)
     else:
-      binary_typeerror(self, other, u"곱하기")
+      raise BinaryTypeError(self, other, u"곱하기")
 
   def divide(self, other):
     if isinstance(other, ConstInteger):
       if other.intval == 0:
-        raise DivideByZero(u"0으로 나눌 수 없습니다.")
+        raise DivideByZero()
       return ConstInteger(self.intval / other.intval)
     elif isinstance(other, ConstReal):
       if other.doubleval == 0:
-        raise DivideByZero(u"0으로 나눌 수 없습니다.")
+        raise DivideByZero()
       return ConstReal(self.intval / other.doubleval)
     else:
-      binary_typeerror(self, other, u"나누기")
+      raise BinaryTypeError(self, other, u"나누기")
 
   def mod(self, other):
     if isinstance(other, ConstInteger):
       if other.intval == 0:
-        raise DivideByZero(u"0으로 나눌 수 없습니다.")
+        raise DivideByZero()
       return ConstInteger(self.intval % other.intval)
     else:
-      binary_typeerror(self, other, u"나머지")
+      raise BinaryTypeError(self, other, u"나머지")
 
   def equal(self, other):
     if isinstance(other, ConstInteger):
@@ -126,7 +126,7 @@ class ConstInteger(Constant):
     elif isinstance(other, ConstReal):
       return ConstBoolean(self.intval < other.doubleval)
     else:
-      binary_typeerror(self, other, u"대소 비교")
+      raise BinaryTypeError(self, other, u"대소 비교")
 
   def greater_than(self, other):
     if isinstance(other, ConstInteger):
@@ -134,7 +134,7 @@ class ConstInteger(Constant):
     elif isinstance(other, ConstReal):
       return ConstBoolean(self.intval > other.doubleval)
     else:
-      binary_typeerror(self, other, u"대소 비교")
+      raise BinaryTypeError(self, other, u"대소 비교")
 
   def negate(self):
     return ConstInteger(-self.intval)
@@ -158,7 +158,7 @@ class ConstReal(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.doubleval + other.doubleval)
     else:
-      binary_typeerror(self, other, u"더하기")
+      raise BinaryTypeError(self, other, u"더하기")
 
   def subtract(self, other):
     if isinstance(other, ConstInteger):
@@ -166,7 +166,7 @@ class ConstReal(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.doubleval - other.doubleval)
     else:
-      binary_typeerror(self, other, u"빼기")
+      raise BinaryTypeError(self, other, u"빼기")
 
   def multiply(self, other):
     if isinstance(other, ConstInteger):
@@ -174,19 +174,19 @@ class ConstReal(Constant):
     elif isinstance(other, ConstReal):
       return ConstReal(self.doubleval * other.doubleval)
     else:
-      binary_typeerror(self, other, u"곱하기")
+      raise BinaryTypeError(self, other, u"곱하기")
 
   def divide(self, other):
     if isinstance(other, ConstInteger):
       if other.intval == 0:
-        raise DivideByZero(u"0으로 나눌 수 없습니다.")
+        raise DivideByZero()
       return ConstReal(self.doubleval / other.intval)
     elif isinstance(other, ConstReal):
       if other.doubleval == 0:
-        raise DivideByZero(u"0으로 나눌 수 없습니다.")
+        raise DivideByZero()
       return ConstReal(self.doubleval / other.doubleval)
     else:
-      binary_typeerror(self, other, u"나누기")
+      raise BinaryTypeError(self, other, u"나누기")
 
   def equal(self, other):
     if isinstance(other, ConstReal):
@@ -200,7 +200,7 @@ class ConstReal(Constant):
     elif isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval < other.doubleval)
     else:
-      binary_typeerror(self, other, u"대소 비교")
+      raise BinaryTypeError(self, other, u"대소 비교")
 
   def greater_than(self, other):
     if isinstance(other, ConstInteger):
@@ -208,7 +208,7 @@ class ConstReal(Constant):
     elif isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval > other.doubleval)
     else:
-      binary_typeerror(self, other, u"대소 비교")
+      raise BinaryTypeError(self, other, u"대소 비교")
 
   def show(self):
     return str(self.doubleval).decode('utf-8')
@@ -236,13 +236,13 @@ class ConstBoolean(Constant):
     if isinstance(other, ConstBoolean):
       return ConstBoolean(self.boolval and other.boolval)
     else:
-      binary_typeerror(self, other, u"그리고")
+      raise BinaryTypeError(self, other, u"그리고")
 
   def logic_or(self, other):
     if isinstance(other, ConstBoolean):
       return ConstBoolean(self.boolval or other.boolval)
     else:
-      binary_typeerror(self, other, u"그리고")
+      raise BinaryTypeError(self, other, u"그리고")
 
   def show(self):
     return u"참" if self.boolval else u"거짓"
