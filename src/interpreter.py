@@ -161,11 +161,13 @@ class Interpreter:
           value = frame.pop()
           field = inst.operand_str
 
-          assert isinstance(value, ConstStruct)
-          if field in value.struct_data:
-            frame.push(value.struct_data[field])
+          if isinstance(value, ConstStruct):
+            if field in value.struct_data:
+              frame.push(value.struct_data[field])
+            else:
+              raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
           else:
-            raise UnknownField(u"%s라는 필드를 찾을 수 없습니다." % field)
+            raise InvalidType(u"이 연산은 구조체에만 사용할 수 있습니다.")
 
         elif op == INST_JMP:
           pc = inst.operand_int
@@ -229,7 +231,8 @@ class Interpreter:
         if e.error_line == 0:
           e.error_line = error_line
         
-        self.stack_trace.append((code_object.name, code_object.file_path, error_line))
+        if len(code_object.file_path) != 0:
+          self.stack_trace.append((code_object.name, code_object.file_path, error_line))
         raise e
 
     if frame.stack_top == 0:
