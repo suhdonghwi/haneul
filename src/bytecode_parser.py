@@ -8,7 +8,6 @@ import math
 from instruction import *
 from constant import *
 from interpreter import *
-from environment import default_globals
 
 from rpython.rlib.rarithmetic import intmask
 from rpython.rlib.rstruct.runpack import runpack

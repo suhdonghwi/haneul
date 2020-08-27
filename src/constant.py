@@ -374,3 +374,9 @@ class BuiltinObject:
 
   def __init__(self, func):
     self.func = func
+
+def list_to_struct(lst):
+  if len(lst) == 0:
+    return ConstNone()
+  else:
+    return ConstStruct({u'첫번째': lst[0], u'나머지': list_to_struct(lst[1:])})

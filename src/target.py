@@ -5,11 +5,10 @@ from interpreter import Interpreter, CodeObject, Env
 from bytecode_parser import BytecodeParser
 from error import HaneulError
 from constant import ConstInteger
-
-from environment import default_globals, default_structs
-
+from environment import default_globals
 
 def entry_point(argv):
+
   try:
     filename = argv[1]
   except IndexError:
@@ -29,7 +28,7 @@ def entry_point(argv):
   func_object = parser.parse_funcobject()
 
   code_object = func_object.funcval
-  interpreter = Interpreter(Env(default_globals, default_structs))
+  interpreter = Interpreter(Env(default_globals, {}))
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:
