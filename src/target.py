@@ -2,7 +2,7 @@
 import os
 
 from interpreter import Interpreter, CodeObject, Env
-from parser import BytecodeParser
+from bytecode_parser import BytecodeParser
 from error import HaneulError
 from constant import ConstInteger
 
