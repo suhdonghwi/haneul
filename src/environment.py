@@ -5,7 +5,7 @@ from constant import *
 from bytecode_parser import BytecodeParser
 from error import InvalidType
 from rpython.rlib import rrandom, rtimer
-from rpython.rlib.rarithmetic import intmask
+from rpython.rlib.rarithmetic import intmask, r_uint
 import os
 import time
 
@@ -80,7 +80,7 @@ def to_real_builtin_func(args):
     raise InvalidType(u"실수화할 수 있는", a.type_name())
 
 def random_builtin_func(args):
-  rng = rrandom.Random(seed=rtimer.read_timestamp())
+  rng = rrandom.Random(seed=r_uint(rtimer.read_timestamp()))
   return ConstInteger(intmask(rng.genrand32()))
 
 print_char_builtin = ConstFunc([(u"을", None)], None, print_char_builtin_func)
