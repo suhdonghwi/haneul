@@ -47,6 +47,11 @@ def to_integer_builtin_func(args):
       return ConstInteger(int(s.encode('utf-8')))
     except:
       return ConstNone()
+  elif isinstance(a, ConstChar):
+    try:
+      return ConstInteger(int(a.charval.encode('utf-8')))
+    except:
+      return ConstNone()
   elif isinstance(a, ConstReal):
     return ConstInteger(int(a.doubleval))
   elif isinstance(a, ConstInteger):
@@ -60,6 +65,11 @@ def to_real_builtin_func(args):
     s = collect_string(a)
     try:
       return ConstReal(float(s.encode('utf-8')))
+    except:
+      return ConstNone()
+  elif isinstance(a, ConstChar):
+    try:
+      return ConstReal(float(a.charval.encode('utf-8')))
     except:
       return ConstNone()
   elif isinstance(a, ConstReal):
