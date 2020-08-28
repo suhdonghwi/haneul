@@ -4,9 +4,13 @@ from rpython.rlib import rfile
 from constant import *
 from bytecode_parser import BytecodeParser
 from error import InvalidType
+from rpython.rlib import rrandom, rtimer
+from rpython.rlib.rarithmetic import intmask
 import os
+import time
 
 LINE_BUFFER_LENGTH = 1024
+
 
 def print_char_builtin_func(args):
   ch = args[0]
@@ -65,11 +69,16 @@ def to_real_builtin_func(args):
   else:
     raise InvalidType(u"실수화할 수 있는", a.type_name())
 
+def random_builtin_func(args):
+  rng = rrandom.Random(seed=rtimer.read_timestamp())
+  return ConstInteger(intmask(rng.genrand32()))
+
 print_char_builtin = ConstFunc([(u"을", None)], None, print_char_builtin_func)
 stringize_builtin = ConstFunc([(u"을", None)], None, stringize_builtin_func)
 input_builtin = ConstFunc([], None, input_builtin_func)
 to_integer_builtin = ConstFunc([(u"을", None)], None, to_integer_builtin_func)
 to_real_builtin = ConstFunc([(u"을", None)], None, to_real_builtin_func)
+random_builtin = ConstFunc([], None, random_builtin_func)
 
 default_globals = {
     u"문자_출력하다": print_char_builtin,
@@ -77,5 +86,6 @@ default_globals = {
     u"입력받다": input_builtin,
     u"정수화하다": to_integer_builtin,
     u"실수화하다": to_real_builtin,
+    u"난수_가져오다": random_builtin,
 }
 
