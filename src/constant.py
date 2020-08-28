@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import jit
 
-from error import InvalidType, DivideByZero, BinaryTypeError, UnaryTypeError
+from error import *
 
 
 class Constant:
@@ -323,6 +323,12 @@ class ConstStruct(Constant):
 
   def copy(self):
     return ConstStruct(self.struct_data)
+  
+  def get_field(self, field):
+    try:
+      return self.struct_data[field]
+    except KeyError:
+      raise UnknownField(field)
 
 class CodeObject:
   _attrs_ = _immutable_fields_ = [
@@ -391,9 +397,9 @@ def collect_string(lst):
   if isinstance(lst, ConstNone):
     return u''
   elif isinstance(lst, ConstStruct):
-    fst = lst.struct_data[u'첫번째']
+    fst = lst.get_field(u'첫번째')
     if isinstance(fst, ConstChar):
-      return fst.charval + collect_string(lst.struct_data[u'나머지'])
+      return fst.charval + collect_string(lst.get_field(u'나머지'))
     else:
       raise InvalidType(u'문자', fst.type_name())
   else:

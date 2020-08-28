@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from rpython.rlib import rfile
 
-from constant import Constant, ConstFunc, ConstNone, ConstChar, ConstInteger, list_to_struct, collect_string
+from constant import *
 from bytecode_parser import BytecodeParser
 from error import InvalidType
 import os
@@ -37,21 +37,45 @@ def input_builtin_func(args):
 
 def to_integer_builtin_func(args):
   a = args[0]
-  s = collect_string(a)
-  try:
-    return ConstInteger(int(s.encode('utf-8')))
-  except:
-    return ConstNone()
+  if isinstance(a, ConstStruct):
+    s = collect_string(a)
+    try:
+      return ConstInteger(int(s.encode('utf-8')))
+    except:
+      return ConstNone()
+  elif isinstance(a, ConstReal):
+    return ConstInteger(int(a.doubleval))
+  elif isinstance(a, ConstInteger):
+    return a
+  else:
+    raise InvalidType(u"정수화할 수 있는", a.type_name())
+
+def to_real_builtin_func(args):
+  a = args[0]
+  if isinstance(a, ConstStruct):
+    s = collect_string(a)
+    try:
+      return ConstReal(float(s.encode('utf-8')))
+    except:
+      return ConstNone()
+  elif isinstance(a, ConstReal):
+    return a
+  elif isinstance(a, ConstInteger):
+    return ConstReal(float(a.intval))
+  else:
+    raise InvalidType(u"실수화할 수 있는", a.type_name())
 
 print_char_builtin = ConstFunc([(u"을", None)], None, print_char_builtin_func)
 stringize_builtin = ConstFunc([(u"을", None)], None, stringize_builtin_func)
 input_builtin = ConstFunc([], None, input_builtin_func)
 to_integer_builtin = ConstFunc([(u"을", None)], None, to_integer_builtin_func)
+to_real_builtin = ConstFunc([(u"을", None)], None, to_real_builtin_func)
 
 default_globals = {
     u"문자_출력하다": print_char_builtin,
     u"문자열화하다": stringize_builtin,
     u"입력받다": input_builtin,
     u"정수화하다": to_integer_builtin,
+    u"실수화하다": to_real_builtin,
 }
 

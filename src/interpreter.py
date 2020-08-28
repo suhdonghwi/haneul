@@ -161,10 +161,7 @@ class Interpreter:
           field = inst.operand_str
 
           if isinstance(value, ConstStruct):
-            if field in value.struct_data:
-              frame.push(value.struct_data[field])
-            else:
-              raise UnknownField(field)
+            frame.push(value.get_field(field))
           else:
             raise InvalidType(u"구조체", value.type_name())
 
