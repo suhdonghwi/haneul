@@ -359,6 +359,7 @@ class CodeObject:
       else:
         break
     
+    assert path is not None
     return (line, path)
 
   def copy(self):
@@ -385,3 +386,15 @@ def list_to_struct(lst):
     return ConstNone()
   else:
     return ConstStruct({u'첫번째': lst[0], u'나머지': list_to_struct(lst[1:])})
+
+def collect_string(lst):
+  if isinstance(lst, ConstNone):
+    return u''
+  elif isinstance(lst, ConstStruct):
+    fst = lst.struct_data[u'첫번째']
+    if isinstance(fst, ConstChar):
+      return fst.charval + collect_string(lst.struct_data[u'나머지'])
+    else:
+      raise InvalidType(u'문자', fst.type_name())
+  else:
+    raise InvalidType(u'구조체', lst.type_name())
