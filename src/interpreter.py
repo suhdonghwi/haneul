@@ -226,12 +226,12 @@ class Interpreter:
 
         pc += 1
       except HaneulError as e:
-        error_line = code_object.calculate_line(pc)
+        (error_line, error_path) = code_object.calculate_pos(pc)
         if e.error_line == 0:
           e.error_line = error_line
         
         if len(code_object.file_path) != 0:
-          self.stack_trace.append((code_object.name, code_object.file_path, error_line))
+          self.stack_trace.append((code_object.name, error_path, error_line))
         raise e
 
     if frame.stack_top == 0:

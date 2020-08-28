@@ -345,16 +345,21 @@ class CodeObject:
   def get_constant(self, index):
     return self.const_table[index]
   
-  def calculate_line(self, pc):
+  def calculate_pos(self, pc):
     line = self.line_no
+    path = self.file_path
 
-    for (inst_offset, line_diff) in self.line_no_table:
+    for (inst_offset, line_info) in self.line_no_table:
       if pc >= inst_offset:
-        line += line_diff
+        if line_info.file_path is None:
+          line = line_info.line
+        else:
+          path = line_info.file_path
+
       else:
         break
     
-    return line
+    return (line, path)
 
   def copy(self):
     return CodeObject(self.var_names,

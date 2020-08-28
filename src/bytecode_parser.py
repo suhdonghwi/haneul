@@ -19,6 +19,11 @@ for (i, typename) in enumerate(TYPE_NAMES):
   globals()['TYPE_' + typename] = i
 
 
+class LineInfo:
+  def __init__(self, line = 0):
+    self.line = line
+    self.file_path = None
+
 class BytecodeParser:
   def __init__(self, code):
     self.code = str(code)
@@ -192,8 +197,15 @@ class BytecodeParser:
     result = []
     for i in range(0, count):
       inst_offset = self.consume_uint()
-      line_diff = self.consume_ushort()
-      result.append((inst_offset, line_diff))
+      is_line = self.consume_ubyte() == 1
+      if is_line:
+        line = self.consume_ushort()
+        result.append((inst_offset, LineInfo(line)))
+      else:
+        path = self.parse_string()
+        info = LineInfo()
+        info.file_path = path
+        result.append((inst_offset, info))
 
     return result
 
