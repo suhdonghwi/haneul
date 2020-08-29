@@ -15,14 +15,9 @@ def entry_point(argv):
     print "파일이 필요합니다."
     return 1
 
-  fp = os.open(filename, os.O_RDONLY, 0777)
-  content = ""
-  while True:
-    read = os.read(fp, 4096)
-    if len(read) == 0:
-      break
-    content += read
-  os.close(fp)
+  fp = open(filename, 'rb')
+  content = fp.read()
+  fp.close()
 
   parser = BytecodeParser(content)
   func_object = parser.parse_funcobject()

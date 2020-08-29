@@ -2,6 +2,7 @@
 import sys
 import os
 sys.path.append('/Users/suhdonghwi/Documents/utils/pypy')
+sys.path.append('C:\Users\hwido\Documents\Nuri\pypy')
 
 import math
 

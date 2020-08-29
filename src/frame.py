@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rpython.rlib import jit
+from rpython.rlib.rarithmetic import intmask
 
 from constant import ConstFunc
 
@@ -12,7 +13,7 @@ class Frame:
   def __init__(self, local_number, local_list, max_stack_size):
     self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
 
-    self.local_list = local_list + [None] * (local_number - len(local_list))
+    self.local_list = local_list + [None] * intmask(local_number - len(local_list))
 
     self.stack = [None] * max_stack_size
     self.stack_top = 0
