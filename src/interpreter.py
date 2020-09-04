@@ -22,7 +22,11 @@ def resolve_josa(josa, josa_map):
   else:
     for (j, (k, v)) in enumerate(josa_map):
       if josa == k:
+        if v is not None:
+          raise DuplicateJosa(josa)
+
         return (josa, j)
+
     raise UnboundJosa(josa)
 
 
@@ -36,7 +40,7 @@ class Env:
 
   def store(self, name, value):
     self.var_map[name] = value
-  
+
   def add_struct(self, name, fields):
     self.struct_map[name] = fields
 
@@ -46,7 +50,7 @@ class Env:
       return self.var_map[name]
     except KeyError:
       raise UnboundVariable(name)
-  
+
   @jit.elidable
   def lookup_struct(self, name):
     try:
@@ -136,7 +140,7 @@ class Interpreter:
 
         elif op == INST_ADD_STRUCT:
           self.env.add_struct(inst.operand_str, inst.operand_josa_list)
-        
+
         elif op == INST_MAKE_STRUCT:
           fields = self.env.lookup_struct(inst.operand_str)
           struct_data = {}
@@ -153,7 +157,7 @@ class Interpreter:
 
             value = frame.pop()
             struct_data[field] = value
-          
+
           frame.push(ConstStruct(struct_data))
 
         elif op == INST_GET_FIELD:
@@ -226,7 +230,7 @@ class Interpreter:
         (error_line, error_path) = code_object.calculate_pos(pc)
         if e.error_line == 0:
           e.error_line = error_line
-        
+
         if len(code_object.file_path) != 0:
           self.stack_trace.append((code_object.name, error_path, error_line))
         raise e

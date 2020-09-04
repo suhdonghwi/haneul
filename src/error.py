@@ -21,6 +21,10 @@ class UnboundJosa(HaneulError):
   def __init__(self, name):
     HaneulError.__init__(self, u"조사 '%s'를 찾을 수 없습니다." % name)
 
+class DuplicateJosa(HaneulError):
+  def __init__(self, name):
+    HaneulError.__init__(self, u"조사 '%s'는 이미 적용되었습니다." % name)
+
 
 class UndefinedFunction(HaneulError):
   def __init__(self):
