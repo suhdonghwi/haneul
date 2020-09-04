@@ -242,7 +242,7 @@ class ConstBoolean(Constant):
     if isinstance(other, ConstBoolean):
       return ConstBoolean(self.boolval or other.boolval)
     else:
-      raise BinaryTypeError(self, other, u"그리고")
+        raise BinaryTypeError(self, other, u"또는")
 
   def show(self):
     return u"참" if self.boolval else u"거짓"
