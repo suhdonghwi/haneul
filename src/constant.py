@@ -117,6 +117,8 @@ class ConstInteger(Constant):
   def equal(self, other):
     if isinstance(other, ConstInteger):
       return ConstBoolean(self.intval == other.intval)
+    elif isinstance(other, ConstReal):
+      return ConstBoolean(self.intval == other.doubleval)
     else:
       return ConstBoolean(False)
 
@@ -191,6 +193,8 @@ class ConstReal(Constant):
   def equal(self, other):
     if isinstance(other, ConstReal):
       return ConstBoolean(self.doubleval == other.doubleval)
+    elif isinstance(other, ConstInteger):
+      return ConstBoolean(self.doubleval == other.intval)
     else:
       return ConstBoolean(False)
 
