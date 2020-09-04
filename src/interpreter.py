@@ -128,13 +128,15 @@ class Interpreter:
               func.josa_map = josa_map
               frame.push(func)
             else:  # rest_arity == 0
-              if value.builtinval is None:
-                result = self.run(value.funcval, args)
-                frame.push(result)
-              else:
+              if value.builtinval is not None:
                 func_result = value.builtinval(args)
                 frame.push(func_result)
+              else:
+                result = self.run(value.funcval, args)
+                frame.push(result)
 
+          elif value is None:
+            raise UndefinedFunction()
           else:
             raise InvalidType(u"함수", value.type_name())
 
