@@ -107,7 +107,7 @@ class Interpreter:
             args = []
             rest_arity = 0
 
-            if value.josa_map is None:
+            if value.josa_map is None: # **자유 변수가** 선언만 된 경우
               raise UndefinedFunction()
 
             if len(value.josa_map) == 1 and len(inst.operand_josa_list) == 1 and value.josa_map[0][0] == inst.operand_josa_list[0]:
@@ -135,7 +135,7 @@ class Interpreter:
                 result = self.run(value.funcval, args)
                 frame.push(result)
 
-          elif value is None:
+          elif value is None: # **로컬 함수가** 선언만 된 경우
             raise UndefinedFunction()
           else:
             raise InvalidType(u"함수", value.type_name())
