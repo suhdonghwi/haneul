@@ -397,6 +397,15 @@ def list_to_struct(lst):
   else:
     return ConstStruct({u'첫번째': lst[0], u'나머지': list_to_struct(lst[1:])})
 
+def collect(lst):
+  if isinstance(lst, ConstNone):
+    return []
+  elif isinstance(lst, ConstStruct):
+    fst = lst.get_field(u'첫번째')
+    return [fst] + collect(lst.get_field(u'나머지'))
+  else:
+    raise InvalidType(u'구조체', lst.type_name())
+
 def collect_string(lst):
   if isinstance(lst, ConstNone):
     return u''
