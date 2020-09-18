@@ -64,6 +64,50 @@ class Interpreter:
     self.env = env
     self.stack_trace = []
 
+  def call(self, inst, frame):
+    given_arity = len(inst.operand_josa_list)
+
+    value = frame.pop()
+    if isinstance(value, ConstFunc):
+      args = []
+      rest_arity = 0
+
+      if value.josa_map is None: # **자유 변수가** 선언만 된 경우
+        raise UndefinedFunction()
+
+      if len(value.josa_map) == 1 and\
+         len(inst.operand_josa_list) == 1 and\
+         value.josa_map[0][0] == inst.operand_josa_list[0]:
+        args.append(frame.pop())
+      else:
+        josa_map = list(value.josa_map)
+        for josa in inst.operand_josa_list:
+          (found_josa, index) = resolve_josa(josa, josa_map)
+          josa_map[index] = (found_josa, frame.pop())
+
+        for (_, v) in josa_map:
+          args.append(v)
+          if v is None:
+            rest_arity += 1
+
+      if rest_arity > 0:
+        func = ConstFunc([], value.funcval, value.builtinval)
+        func.josa_map = josa_map
+        frame.push(func)
+      else:  # rest_arity == 0
+        if value.builtinval is not None:
+          func_result = value.builtinval(self, args)
+          frame.push(func_result)
+        else:
+          result = self.run(value.funcval, args)
+          frame.push(result)
+
+    elif value is None: # **로컬 함수가** 선언만 된 경우
+      raise UndefinedFunction()
+    else:
+      raise InvalidType(u"함수", value.type_name())
+
+
   def run(self, code_object, args):
     pc = 0
     frame = Frame(code_object.local_number, args, code_object.stack_size)
@@ -100,47 +144,7 @@ class Interpreter:
           self.env.store(code_object.var_names[inst.operand_int], frame.pop())
 
         elif op == INST_CALL:
-          given_arity = len(inst.operand_josa_list)
-
-          value = frame.pop()
-          if isinstance(value, ConstFunc):
-            args = []
-            rest_arity = 0
-
-            if value.josa_map is None: # **자유 변수가** 선언만 된 경우
-              raise UndefinedFunction()
-
-            if len(value.josa_map) == 1 and\
-               len(inst.operand_josa_list) == 1 and\
-               value.josa_map[0][0] == inst.operand_josa_list[0]:
-              args.append(frame.pop())
-            else:
-              josa_map = list(value.josa_map)
-              for josa in inst.operand_josa_list:
-                (found_josa, index) = resolve_josa(josa, josa_map)
-                josa_map[index] = (found_josa, frame.pop())
-
-              for (_, v) in josa_map:
-                args.append(v)
-                if v is None:
-                  rest_arity += 1
-
-            if rest_arity > 0:
-              func = ConstFunc([], value.funcval, value.builtinval)
-              func.josa_map = josa_map
-              frame.push(func)
-            else:  # rest_arity == 0
-              if value.builtinval is not None:
-                func_result = value.builtinval(self, args)
-                frame.push(func_result)
-              else:
-                result = self.run(value.funcval, args)
-                frame.push(result)
-
-          elif value is None: # **로컬 함수가** 선언만 된 경우
-            raise UndefinedFunction()
-          else:
-            raise InvalidType(u"함수", value.type_name())
+          self.call(inst, frame)
 
         elif op == INST_ADD_STRUCT:
           self.env.add_struct(inst.operand_str, inst.operand_josa_list)

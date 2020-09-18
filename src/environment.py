@@ -84,8 +84,8 @@ def random_builtin_func(_, args):
   return ConstInteger(intmask(rng.genrand32()))
 
 def call_builtin_func(self, args):
-  arg = args[1]
   func = args[0]
+  arg = args[1]
 
   arg_list = []
   if isinstance(arg, ConstStruct):
@@ -93,11 +93,14 @@ def call_builtin_func(self, args):
   else:
     arg_list = [arg]
 
-  assert isinstance(func, ConstFunc)
-  if func.builtinval is not None:
-    return func.builtinval(self, arg_list)
+  if isinstance(func, ConstFunc):
+    if func.builtinval is not None:
+      return func.builtinval(self, arg_list)
+    else:
+      return self.run(func.funcval, arg_list)
   else:
-    return self.run(func.funcval, arg_list)
+    raise InvalidType(u"함수", func.type_name())
+
 
 print_char_builtin = ConstFunc([(u"을", None)], None, print_char_builtin_func)
 stringize_builtin = ConstFunc([(u"을", None)], None, stringize_builtin_func)
