@@ -91,11 +91,11 @@ to_real_builtin = ConstFunc([(u"을", None)], None, to_real_builtin_func)
 random_builtin = ConstFunc([], None, random_builtin_func)
 
 default_globals = {
-    u"문자_출력하다": print_char_builtin,
+    u"문자 출력하다": print_char_builtin,
     u"문자열화하다": stringize_builtin,
     u"입력받다": input_builtin,
     u"정수화하다": to_integer_builtin,
     u"실수화하다": to_real_builtin,
-    u"난수_가져오다": random_builtin,
+    u"난수 가져오다": random_builtin,
 }
 
