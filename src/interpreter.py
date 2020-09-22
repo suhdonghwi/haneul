@@ -75,20 +75,15 @@ class Interpreter:
       if value.josa_map is None: # **자유 변수가** 선언만 된 경우
         raise UndefinedFunction()
 
-      if len(value.josa_map) == 1 and\
-         len(inst.operand_josa_list) == 1 and\
-         value.josa_map[0][0] == inst.operand_josa_list[0]:
-        args.append(frame.pop())
-      else:
-        josa_map = list(value.josa_map)
-        for josa in inst.operand_josa_list:
-          (found_josa, index) = resolve_josa(josa, josa_map)
-          josa_map[index] = (found_josa, frame.pop())
+      josa_map = list(value.josa_map)
+      for josa in inst.operand_josa_list:
+        (found_josa, index) = resolve_josa(josa, josa_map)
+        josa_map[index] = (found_josa, frame.pop())
 
-        for (_, v) in josa_map:
-          args.append(v)
-          if v is None:
-            rest_arity += 1
+      for (_, v) in josa_map:
+        args.append(v)
+        if v is None:
+          rest_arity += 1
 
       if rest_arity > 0:
         func = ConstFunc([], value.funcval, value.builtinval)
@@ -96,7 +91,7 @@ class Interpreter:
         frame.push(func)
       else:  # rest_arity == 0
         if value.builtinval is not None:
-          func_result = value.builtinval(self, args)
+          func_result = value.builtinval(args)
           frame.push(func_result)
         else:
           result = self.run(value.funcval, args)
