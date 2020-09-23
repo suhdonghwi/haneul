@@ -83,12 +83,29 @@ def random_builtin_func(args):
   rng = rrandom.Random(seed=r_uint(rtimer.read_timestamp()))
   return ConstInteger(intmask(rng.genrand32()))
 
+def get_unicode_func(args):
+  a = args[0]
+  if isinstance(a, ConstChar):
+    return ConstInteger(ord(a.charval[0]))
+  else:
+    raise InvalidType(u"문자", a.type_name())
+
+def nth_unicode_func(args):
+  a = args[0]
+  if isinstance(a, ConstInteger):
+    return ConstChar(unichr(a.intval))
+  else:
+    raise InvalidType(u"정수", a.type_name())
+
+
 print_char_builtin = ConstFunc([(u"을", None)], None, print_char_builtin_func)
 stringize_builtin = ConstFunc([(u"을", None)], None, stringize_builtin_func)
 input_builtin = ConstFunc([], None, input_builtin_func)
 to_integer_builtin = ConstFunc([(u"을", None)], None, to_integer_builtin_func)
 to_real_builtin = ConstFunc([(u"을", None)], None, to_real_builtin_func)
 random_builtin = ConstFunc([], None, random_builtin_func)
+get_unicode_builtin = ConstFunc([(u"의", None)], None, get_unicode_func)
+nth_unicode_builtin = ConstFunc([(u"번째", None)], None, nth_unicode_func)
 
 default_globals = {
     u"문자로 보여주다": print_char_builtin,
@@ -97,5 +114,7 @@ default_globals = {
     u"실수로 바꾸다": to_real_builtin,
     u"난수를 가져오다": random_builtin,
     u"입력받다": input_builtin,
+    u"유니코드 값": get_unicode_builtin,
+    u"유니코드 문자": nth_unicode_builtin,
 }
 
