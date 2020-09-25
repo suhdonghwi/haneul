@@ -50,14 +50,13 @@ def entry_point(argv):
       if len(code_object.file_path) != 0:
         stack_trace.append((code_object.name, error_path, error_line))
 
-    for (name, path, line) in reversed(stack_trace):
+    for (name, path, line) in stack_trace:
       if name == u"":
         print (u"파일 '%s', %d번째 줄:" % (path, line)).encode('utf-8')
       else:
         print (u"파일 '%s', %d번째 줄, %s:" % (path, line, name)).encode('utf-8')
 
     (_, path, line) = stack_trace[-1]
-    print e.message.encode('utf-8')
     error_file = open(path.encode('utf-8'), 'r') 
     last_line = None
     for i in range(0, line):

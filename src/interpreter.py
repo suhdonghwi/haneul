@@ -7,8 +7,8 @@ from error import *
 from frame import Frame
 
 jitdriver = jit.JitDriver(greens=['pc', 'code_object'],
-                          reds=['frame', 'self'],
-                          virtualizables=['frame']
+                          reds=['frame', 'self']
+                          # , virtualizables=['frame']
                           )
 
 
@@ -70,6 +70,10 @@ class Interpreter:
 
     try:
       while True: # pc < len(code_object.code):
+        jitdriver.jit_merge_point(
+            pc=pc, code_object=code_object,
+            frame=frame, self=self)
+
         if pc >= len(code_object.code):
           if frame.stack_top == 0:
             return None
@@ -81,10 +85,6 @@ class Interpreter:
             pc += 1
             frame.push(result)
             continue
-
-        jitdriver.jit_merge_point(
-            pc=pc, code_object=code_object,
-            frame=frame, self=self)
 
         inst = jit.promote(code_object.code[pc])
         op = jit.promote(inst.opcode)

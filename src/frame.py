@@ -8,10 +8,10 @@ from constant import ConstFunc
 
 class Frame:
   _immutable_fields_ = ['locals', 'stack']
-  _virtualizable_ = ['local_list[*]', 'stack[*]', 'stack_top']
+  # _virtualizable_ = ['local_list[*]', 'stack[*]', 'stack_top']
 
   def __init__(self, local_number, local_list, max_stack_size):
-    self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
+    # self = jit.hint(self, access_directly=True, fresh_virtualizable=True)
 
     self.local_list = local_list + [None] * intmask(local_number - len(local_list))
 
