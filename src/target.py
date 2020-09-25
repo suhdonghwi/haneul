@@ -29,7 +29,6 @@ def entry_point(argv):
       content += read	
     os.close(fp)
   
-  
 
   parser = BytecodeParser(content)
   func_object = parser.parse_funcobject()
@@ -39,13 +38,26 @@ def entry_point(argv):
   try:
     interpreter.run(code_object, [])
   except HaneulError as e:
-    for (name, path, line) in reversed(interpreter.stack_trace):
+    stack_trace = []
+
+    for (pc, frame, code_object) in interpreter.call_stack:
+      (error_line, error_path) = code_object.calculate_pos(pc)
+      """
+      if e.error_line == 0:
+        e.error_line = error_line
+      """
+
+      if len(code_object.file_path) != 0:
+        stack_trace.append((code_object.name, error_path, error_line))
+
+    for (name, path, line) in reversed(stack_trace):
       if name == u"":
         print (u"파일 '%s', %d번째 줄:" % (path, line)).encode('utf-8')
       else:
         print (u"파일 '%s', %d번째 줄, %s:" % (path, line, name)).encode('utf-8')
 
-    (_, path, line) = interpreter.stack_trace[0]
+    (_, path, line) = stack_trace[-1]
+    print e.message.encode('utf-8')
     error_file = open(path.encode('utf-8'), 'r') 
     last_line = None
     for i in range(0, line):

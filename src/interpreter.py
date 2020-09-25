@@ -62,60 +62,33 @@ class Env:
 class Interpreter:
   def __init__(self, env):
     self.env = env
-    self.stack_trace = []
-
-  def call(self, inst, frame):
-    given_arity = len(inst.operand_josa_list)
-
-    value = frame.pop()
-    if isinstance(value, ConstFunc):
-      args = []
-      rest_arity = 0
-
-      if value.josa_map is None: # **자유 변수가** 선언만 된 경우
-        raise UndefinedFunction()
-
-      josa_map = list(value.josa_map)
-      for josa in inst.operand_josa_list:
-        (found_josa, index) = resolve_josa(josa, josa_map)
-        josa_map[index] = (found_josa, frame.pop())
-
-      for (_, v) in josa_map:
-        args.append(v)
-        if v is None:
-          rest_arity += 1
-
-      if rest_arity > 0:
-        func = ConstFunc([], value.funcval, value.builtinval)
-        func.josa_map = josa_map
-        frame.push(func)
-      else:  # rest_arity == 0
-        if value.builtinval is not None:
-          func_result = value.builtinval(args)
-          frame.push(func_result)
-        else:
-          result = self.run(value.funcval, args)
-          frame.push(result)
-
-    elif value is None: # **로컬 함수가** 선언만 된 경우
-      raise UndefinedFunction()
-    else:
-      raise InvalidType(u"함수", value.type_name())
-
+    self.call_stack = []
 
   def run(self, code_object, args):
     pc = 0
     frame = Frame(code_object.local_number, args, code_object.stack_size)
-    code_object = jit.promote(code_object)
 
-    while pc < len(code_object.code):
-      jitdriver.jit_merge_point(
-          pc=pc, code_object=code_object,
-          frame=frame, self=self)
+    try:
+      while True: # pc < len(code_object.code):
+        if pc >= len(code_object.code):
+          if frame.stack_top == 0:
+            return None
+          else:
+            result = frame.pop()
 
-      inst = jit.promote(code_object.code[pc])
-      op = jit.promote(inst.opcode)
-      try:
+            (pc, frame, code_object) = self.call_stack.pop()
+
+            pc += 1
+            frame.push(result)
+            continue
+
+        jitdriver.jit_merge_point(
+            pc=pc, code_object=code_object,
+            frame=frame, self=self)
+
+        inst = jit.promote(code_object.code[pc])
+        op = jit.promote(inst.opcode)
+
         if op == INST_PUSH:
           frame.push(code_object.get_constant(inst.operand_int))
 
@@ -139,7 +112,45 @@ class Interpreter:
           self.env.store(code_object.var_names[inst.operand_int], frame.pop())
 
         elif op == INST_CALL:
-          self.call(inst, frame)
+          given_arity = len(inst.operand_josa_list)
+
+          value = frame.pop()
+          if isinstance(value, ConstFunc):
+            args = []
+            rest_arity = 0
+
+            if value.josa_map is None: # **자유 변수가** 선언만 된 경우
+              raise UndefinedFunction()
+
+            josa_map = list(value.josa_map)
+            for josa in inst.operand_josa_list:
+              (found_josa, index) = resolve_josa(josa, josa_map)
+              josa_map[index] = (found_josa, frame.pop())
+
+            for (_, v) in josa_map:
+              args.append(v)
+              if v is None:
+                rest_arity += 1
+
+            if rest_arity > 0:
+              func = ConstFunc([], value.funcval, value.builtinval)
+              func.josa_map = josa_map
+              frame.push(func)
+            else:  # rest_arity == 0
+              if value.builtinval is not None:
+                func_result = value.builtinval(args)
+                frame.push(func_result)
+              else:
+                self.call_stack.append((pc, frame, code_object))
+                pc = 0
+                frame = Frame(value.funcval.local_number, args, value.funcval.stack_size)
+                code_object = value.funcval
+                continue
+
+          elif value is None: # **로컬 함수가** 선언만 된 경우
+            raise UndefinedFunction()
+          else:
+            raise InvalidType(u"함수", value.type_name())
 
         elif op == INST_ADD_STRUCT:
           self.env.add_struct(inst.operand_str, inst.operand_josa_list)
@@ -229,16 +240,7 @@ class Interpreter:
             frame.push(lhs.logic_or(rhs))
 
         pc += 1
-      except HaneulError as e:
-        (error_line, error_path) = code_object.calculate_pos(pc)
-        if e.error_line == 0:
-          e.error_line = error_line
 
-        if len(code_object.file_path) != 0:
-          self.stack_trace.append((code_object.name, error_path, error_line))
-        raise e
-
-    if frame.stack_top == 0:
-      return None
-    else:
-      return frame.pop()
+    except HaneulError as e:
+      self.call_stack.append((pc, frame, code_object))
+      raise e
