@@ -214,6 +214,9 @@ class ConstReal(Constant):
     else:
       raise BinaryTypeError(self, other, u"대소 비교")
 
+  def negate(self):
+    return ConstReal(-self.doubleval)
+
   def show(self):
     return str(self.doubleval).decode('utf-8')
 
